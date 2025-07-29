@@ -5,6 +5,7 @@ import BreedSelector from './components/BreedSelector';
 import CalculationForm from './components/CalculationForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import LanguageSelector from './components/LanguageSelector';
+import FAODietCalculator from './components/FAODietCalculator';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
 const AppContent = () => {
@@ -12,6 +13,7 @@ const AppContent = () => {
   const [selectedBreed, setSelectedBreed] = useState(null);
   const [measurements, setMeasurements] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [currentCalculator, setCurrentCalculator] = useState('original'); // 'original' or 'fao'
   const { t } = useLanguage();
 
   const handleCountrySelect = (countryCode) => {
@@ -56,6 +58,31 @@ const AppContent = () => {
             </div>
             <div className="flex items-center space-x-4">
               <LanguageSelector />
+              
+              {/* Calculator Toggle */}
+              <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setCurrentCalculator('original')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                    currentCalculator === 'original'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  🐄 Básico
+                </button>
+                <button
+                  onClick={() => setCurrentCalculator('fao')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                    currentCalculator === 'fao'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  🐂 FAO Pro
+                </button>
+              </div>
+              
               <a 
                 href="https://github.com" 
                 target="_blank" 
@@ -74,54 +101,62 @@ const AppContent = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!showResults ? (
-          <>
-            {/* Hero Section */}
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">
-                {t('cattleHeroTitle')}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                {t('cattleHeroSubtitle')}
-              </p>
-            </div>
-
-            {/* Country Selection */}
-            <section className="mb-12">
-              <CountrySelector
-                selectedCountry={selectedCountry}
-                onCountrySelect={handleCountrySelect}
-              />
-            </section>
-
-            {/* Breed Selection */}
-            <section className="mb-12">
-              <BreedSelector
-                selectedCountry={selectedCountry}
-                selectedBreed={selectedBreed}
-                onBreedSelect={handleBreedSelect}
-              />
-            </section>
-
-            {/* Calculation Form */}
-            <section>
-              <CalculationForm
-                animal={selectedBreed}
-                onCalculate={handleCalculate}
-              />
-            </section>
-          </>
+        {currentCalculator === 'fao' ? (
+          /* FAO Professional Calculator */
+          <FAODietCalculator />
         ) : (
-          /* Results Display */
-          <ResultsDisplay
-            animal={selectedBreed}
-            measurements={measurements}
-            onReset={handleReset}
-          />
+          /* Original Calculator */
+          <>
+            {!showResults ? (
+              <>
+                {/* Hero Section */}
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                    {t('cattleHeroTitle')}
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                    {t('cattleHeroSubtitle')}
+                  </p>
+                </div>
+
+                {/* Country Selection */}
+                <section className="mb-12">
+                  <CountrySelector
+                    selectedCountry={selectedCountry}
+                    onCountrySelect={handleCountrySelect}
+                  />
+                </section>
+
+                {/* Breed Selection */}
+                <section className="mb-12">
+                  <BreedSelector
+                    selectedCountry={selectedCountry}
+                    selectedBreed={selectedBreed}
+                    onBreedSelect={handleBreedSelect}
+                  />
+                </section>
+
+                {/* Calculation Form */}
+                <section>
+                  <CalculationForm
+                    animal={selectedBreed}
+                    onCalculate={handleCalculate}
+                  />
+                </section>
+              </>
+            ) : (
+              /* Results Display */
+              <ResultsDisplay
+                animal={selectedBreed}
+                measurements={measurements}
+                onReset={handleReset}
+              />
+            )}
+          </>
         )}
 
         {/* Features Section */}
-        {!showResults && (
+        {currentCalculator === 'original' && !showResults && (
           <section className="mt-16 mb-12">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -177,9 +212,9 @@ const AppContent = () => {
             <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
               <span>© 2024 Exotic Animal Calculator</span>
               <span>•</span>
-              <a href="#" className="hover:text-gray-700 transition-colors">Privacy Policy</a>
+              <button className="hover:text-gray-700 transition-colors">Privacy Policy</button>
               <span>•</span>
-              <a href="#" className="hover:text-gray-700 transition-colors">Terms of Service</a>
+              <button className="hover:text-gray-700 transition-colors">Terms of Service</button>
             </div>
           </div>
         </div>

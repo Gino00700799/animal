@@ -295,6 +295,11 @@ export const cattleTypes = {
     icon: "🥩",
     color: "red"
   },
+  veal: {
+    name: { de: "Kalbfleisch", en: "Veal", es: "Ternera" },
+    icon: "🐮",
+    color: "green"
+  },
   dual: {
     name: { de: "Zweinutzung", en: "Dual Purpose", es: "Doble Propósito" },
     icon: "⚖️",

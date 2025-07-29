@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getBreedById } from '../data/cattleBreeds';
-import { getCattleNutritionForWeight, calculateCattleFeedRequirements } from '../data/cattleNutrition';
+// import { getCattleNutritionForWeight, calculateCattleFeedRequirements } from '../data/cattleNutrition';
 
 // Futtermittel-Datenbank mit Nährstoffwerten
 const feedDatabase = [
@@ -98,7 +98,7 @@ const feedDatabase = [
 ];
 
 const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [dailyGain, setDailyGain] = useState(1.2); // kg pro Tag
   const [activityLevel, setActivityLevel] = useState('normal');
   const [feedRecommendations, setFeedRecommendations] = useState([]);
@@ -106,7 +106,7 @@ const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
   const [energyRequirement, setEnergyRequirement] = useState(0);
 
   // Berechnung des Energiebedarfs basierend auf Gewicht, Zunahme und Kalorienmultiplikator
-  const calculateEnergyRequirement = () => {
+  const calculateEnergyRequirement = useCallback(() => {
     if (!selectedBreed || !measurements.weight) return 0;
 
     const breed = getBreedById(selectedBreed);
@@ -128,10 +128,10 @@ const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
 
     const totalEnergy = (baseEnergy + gainEnergy) * activityFactors[activityLevel];
     return Math.round(totalEnergy * 10) / 10;
-  };
+  }, [selectedBreed, measurements.weight, dailyGain, activityLevel]);
 
   // Optimierte Futtermittel-Empfehlungen basierend auf Energiebedarf
-  const calculateFeedRecommendations = (energyNeeded) => {
+  const calculateFeedRecommendations = useCallback((energyNeeded) => {
     const recommendations = [];
     let remainingEnergy = energyNeeded;
     let totalDailyCost = 0;
@@ -221,7 +221,7 @@ const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
     }
 
     return { recommendations, totalCost: Math.round(totalDailyCost * 100) / 100 };
-  };
+  }, []);
 
   useEffect(() => {
     const energy = calculateEnergyRequirement();
@@ -232,7 +232,7 @@ const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
       setFeedRecommendations(recommendations);
       setTotalCost(totalCost);
     }
-  }, [selectedBreed, measurements.weight, dailyGain, activityLevel]);
+  }, [selectedBreed, measurements.weight, dailyGain, activityLevel, calculateEnergyRequirement, calculateFeedRecommendations]);
 
   if (!selectedBreed || !measurements.weight) {
     return (
@@ -246,9 +246,9 @@ const CattleFeedCalculator = ({ selectedBreed, measurements }) => {
     );
   }
 
-  const breed = getBreedById(selectedBreed);
+  // const breed = getBreedById(selectedBreed);
   const totalFeedAmount = feedRecommendations.reduce((sum, rec) => sum + rec.amount, 0);
-  const totalEnergyProvided = feedRecommendations.reduce((sum, rec) => sum + rec.energyProvided, 0);
+  // const totalEnergyProvided = feedRecommendations.reduce((sum, rec) => sum + rec.energyProvided, 0);
 
   return (
     <div className="space-y-6">

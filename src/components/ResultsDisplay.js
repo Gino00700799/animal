@@ -7,11 +7,16 @@ import {
   calculateBMI, 
   getBMICategory, 
   calculateWaterNeeds, 
-  getFeedingRecommendations 
+  getFeedingRecommendations,
+  calculateFaoEnergyRequirement 
 } from '../utils/calculations';
 import { getDietInfo } from '../data/animals';
 import CattleNutritionDisplay from './CattleNutritionDisplay';
 import CattleFeedCalculator from './CattleFeedCalculator';
+import ExportReport from './ExportReport';
+import FeedCostCalculator from './FeedCostCalculator';
+import CostCalculator from './CostCalculator';
+import WeatherIntegration from './WeatherIntegration';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const ResultsDisplay = ({ animal, measurements, onReset }) => {
@@ -26,6 +31,16 @@ const ResultsDisplay = ({ animal, measurements, onReset }) => {
   const waterNeeds = calculateWaterNeeds(measurements.weight, calories);
   const recommendations = getFeedingRecommendations(animal, measurements.weight, calories);
   const dietInfo = getDietInfo(animal.diet);
+
+  // FAO-Berechnung für Rinder
+  let faoData = null;
+  if (animal.type === 'beef' || animal.type === 'veal' || animal.type === 'dairy') {
+    let adg = 1.2; // Standard für Mastbullen
+    if (animal.type === 'veal') adg = 1.0;
+    if (animal.type === 'dairy') adg = 0.8;
+    
+    faoData = calculateFaoEnergyRequirement(measurements.weight, adg);
+  }
 
   // Data for charts
   const nutritionData = [
@@ -137,6 +152,54 @@ const ResultsDisplay = ({ animal, measurements, onReset }) => {
         </div>
       </div>
 
+      {/* FAO Energy Requirements for Cattle */}
+      {faoData && (
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-xl p-6 shadow-lg">
+          <div className="flex items-center mb-4">
+            <div className="text-2xl mr-3">🔬</div>
+            <div>
+              <h3 className="text-xl font-bold text-green-800">
+                FAO Energiebedarf-Berechnung
+              </h3>
+              <p className="text-green-700 text-sm">
+                Wissenschaftliche Berechnung nach FAO Animal Production and Health Paper 1 (2001, 2004)
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/80 rounded-lg p-4 text-center">
+              <div className="text-lg font-semibold text-gray-800">Erhaltungsbedarf</div>
+              <div className="text-2xl font-bold text-blue-600">{faoData.maintenance}</div>
+              <div className="text-sm text-gray-600">MJ ME/Tag</div>
+              <div className="text-xs text-gray-500 mt-1">NEm = 0.322 × BW^0.75</div>
+            </div>
+            
+            <div className="bg-white/80 rounded-lg p-4 text-center">
+              <div className="text-lg font-semibold text-gray-800">Wachstumsbedarf</div>
+              <div className="text-2xl font-bold text-green-600">{faoData.gain}</div>
+              <div className="text-sm text-gray-600">MJ ME/Tag</div>
+              <div className="text-xs text-gray-500 mt-1">NEg = 0.0368 × BW^0.75 × ADG^1.097</div>
+            </div>
+            
+            <div className="bg-white/80 rounded-lg p-4 text-center">
+              <div className="text-lg font-semibold text-gray-800">Gesamtenergiebedarf</div>
+              <div className="text-2xl font-bold text-purple-600">{faoData.totalME}</div>
+              <div className="text-sm text-gray-600">MJ ME/Tag</div>
+              <div className="text-xs text-gray-500 mt-1">≈ {Math.round(faoData.totalME * 239).toLocaleString()} kcal</div>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="text-sm text-blue-800">
+              <strong>Erklärung:</strong> BW = Körpergewicht ({measurements.weight} kg), 
+              ADG = Tägliche Gewichtszunahme ({animal.type === 'veal' ? '1.0' : animal.type === 'dairy' ? '0.8' : '1.2'} kg/Tag), 
+              ME = Metabolisierbare Energie
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Nutrition Breakdown */}
@@ -243,8 +306,63 @@ const ResultsDisplay = ({ animal, measurements, onReset }) => {
       {/* Professional Cattle Nutrition Section */}
       <CattleNutritionDisplay animal={animal} measurements={measurements} />
       
+      {/* Cost Calculator Section */}
+      <CostCalculator 
+        animal={animal} 
+        measurements={measurements} 
+        feedRequirements={{
+          hayKg: Math.round(measurements.weight * 0.015 * 10) / 10,
+          concentrateKg: Math.round(measurements.weight * 0.008 * 10) / 10,
+          silageKg: Math.round(measurements.weight * 0.02 * 10) / 10,
+          waterLiters: Math.round(measurements.weight * 0.08)
+        }}
+      />
+      
       {/* Advanced Feed Calculator Section */}
       <CattleFeedCalculator selectedBreed={animal.id} measurements={measurements} />
+      
+      {/* Weather Integration Section */}
+      <WeatherIntegration 
+        feedRequirements={{
+          waterLiters: waterNeeds,
+          energyMJ: faoData ? faoData.totalME : calories / 239,
+          totalDryMatter: measurements.weight * 0.025
+        }}
+        onWeatherAdjustment={(adjustments) => {
+          // Handle weather adjustments if needed
+          console.log('Weather adjustments:', adjustments);
+        }}
+      />
+      
+      {/* Feed Cost Calculator Section */}
+      <FeedCostCalculator 
+        feedRequirements={{
+          hayKg: Math.round(measurements.weight * 0.015 * 10) / 10,
+          concentrateKg: Math.round(measurements.weight * 0.008 * 10) / 10,
+          silageKg: Math.round(measurements.weight * 0.02 * 10) / 10,
+          waterLiters: waterNeeds,
+          totalDryMatter: measurements.weight * 0.025
+        }}
+        animal={animal}
+      />
+      
+      {/* Export Report Section */}
+      <ExportReport 
+        animal={animal}
+        measurements={measurements}
+        nutritionData={{
+          tmKg: measurements.weight * 0.025,
+          tdnKg: measurements.weight * 0.015,
+          dcpKg: measurements.weight * 0.002
+        }}
+        feedRequirements={{
+          hayKg: Math.round(measurements.weight * 0.015 * 10) / 10,
+          concentrateKg: Math.round(measurements.weight * 0.008 * 10) / 10,
+          silageKg: Math.round(measurements.weight * 0.02 * 10) / 10,
+          waterLiters: waterNeeds,
+          dailyCostEuro: Math.round((measurements.weight * 0.025 * 0.25) * 100) / 100
+        }}
+      />
     </div>
   );
 };

@@ -1,12 +1,53 @@
 // Calculation utilities for animal calorie and nutrition needs
 
+/**
+ * Berechnet den täglichen Energiebedarf (MJ ME/Tag) für ein Rind gemäß FAO-Richtlinien.
+ * Quelle: FAO Animal Production and Health Paper 1 (2001, 2004)
+ *
+ * Formel:
+ * ME = NEm + NEg
+ * NEm = 0.322 × BW^0.75 (MJ pro Tag)
+ * NEg = 0.0368 × BW^0.75 × ADG^1.097
+ * 
+ * Variablen:
+ * BW = Körpergewicht in kg
+ * ADG = durchschnittliche tägliche Gewichtszunahme in kg/Tag (z. B. 1.2 für 1200g)
+ */
+export const calculateFaoEnergyRequirement = (BW, ADG = 1.2) => {
+  const metabolicWeight = Math.pow(BW, 0.75);
+
+  const NEm = 0.322 * metabolicWeight; // Net energy for maintenance
+  const NEg = 0.0368 * metabolicWeight * Math.pow(ADG, 1.097); // Net energy for gain
+
+  const ME = NEm + NEg; // Gesamtenergiebedarf in MJ/Tag
+  return {
+    maintenance: parseFloat(NEm.toFixed(2)),
+    gain: parseFloat(NEg.toFixed(2)),
+    totalME: parseFloat(ME.toFixed(2))
+  };
+};
+
 export const calculateCalories = (animal, weight) => {
   if (!animal || !weight || weight <= 0) return 0;
   
-  // Base calculation: weight × multiplier
-  const baseCalories = weight * animal.calorieMultiplier;
+  // Für Rinder: Verwende FAO-Methode
+  if (animal.type === 'beef' || animal.type === 'veal' || animal.type === 'dairy') {
+    // Bestimme ADG basierend auf Tiertyp
+    let adg = 1.2; // Standard für Mastbullen
+    
+    if (animal.type === 'veal') {
+      adg = 1.0; // Kälber wachsen langsamer
+    } else if (animal.type === 'dairy') {
+      adg = 0.8; // Milchkühe haben geringere Gewichtszunahme
+    }
+    
+    const faoResult = calculateFaoEnergyRequirement(weight, adg);
+    // Konvertiere MJ zu Kalorien (1 MJ = 239 kcal)
+    return Math.round(faoResult.totalME * 239);
+  }
   
-  // Add some variation based on animal type
+  // Fallback für andere Tiere: ursprüngliche Methode
+  const baseCalories = weight * animal.calorieMultiplier;
   let adjustedCalories = baseCalories;
   
   // Larger animals are more efficient (lower calories per kg)

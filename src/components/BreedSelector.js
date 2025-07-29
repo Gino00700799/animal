@@ -85,14 +85,14 @@ const BreedSelector = ({ selectedCountry, selectedBreed, onBreedSelect }) => {
               <div className="flex justify-center mb-4">
                 <span className={`
                   inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                  ${breedType.color === 'blue' ? 'bg-blue-100 text-blue-700' :
-                    breedType.color === 'red' ? 'bg-red-100 text-red-700' :
-                    breedType.color === 'green' ? 'bg-green-100 text-green-700' :
+                  ${breedType?.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                    breedType?.color === 'red' ? 'bg-red-100 text-red-700' :
+                    breedType?.color === 'green' ? 'bg-green-100 text-green-700' :
                     'bg-purple-100 text-purple-700'
                   }
                 `}>
-                  <span className="mr-1">{breedType.icon}</span>
-                  {breedType.name[language]}
+                  <span className="mr-1">{breedType?.icon || '🐮'}</span>
+                  {breedType?.name?.[language] || breed.type}
                 </span>
               </div>
 
