@@ -23,9 +23,9 @@ export const optimizeDiet = (requirements, ingredients, constraints = {}, method
   // Configurar restricciones por categoría de ingrediente (más flexibles)
   const categoryLimits = {
     forrajes_secos: dryMatterIntake * 0.70, // Máximo 70% forrajes secos
-    pastos_verdes: dryMatterIntake * 0.20, // Máximo 20% pastos verdes - sistema intensivo
+    pastos_verdes: dryMatterIntake * 0.05, // Máximo 5% pastos verdes - sistema intensivo (solo fibra mínima)
     ensilados: dryMatterIntake * 0.60, // Máximo 60% ensilados
-    alimentos_energeticos: dryMatterIntake * 0.60, // Máximo 60% concentrados (aumentado)
+    alimentos_energeticos: dryMatterIntake * 0.80, // Máximo 80% concentrados - sistema intensivo
     suplementos_proteicos: dryMatterIntake * 0.25, // Máximo 25% proteína (aumentado)
     minerales: dryMatterIntake * 0.05, // Máximo 5% minerales
     vitaminas: dryMatterIntake * 0.02, // Máximo 2% vitaminas

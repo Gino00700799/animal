@@ -116,7 +116,7 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     
     const categoryLimits = {
       'forrajes_secos': dryMatterIntake * 0.70,
-      'pastos_verdes': dryMatterIntake * 0.80,
+      'pastos_verdes: dryMatterIntake * 0.05, // Solo fibra mínima - sistema intensivo
       'ensilados': dryMatterIntake * 0.60,
       'alimentos_energeticos': dryMatterIntake * 0.60,
       'suplementos_proteicos': dryMatterIntake * 0.25,
@@ -170,7 +170,7 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     const dryMatterIntake = animalData.dryMatterIntake || (animalData.weight * 0.025);
     const categoryLimits = {
       'forrajes_secos': dryMatterIntake * 0.70,
-      'pastos_verdes': dryMatterIntake * 0.80,
+      'pastos_verdes: dryMatterIntake * 0.05, // Solo fibra mínima - sistema intensivo
       'ensilados': dryMatterIntake * 0.60,
       'alimentos_energeticos': dryMatterIntake * 0.60,
       'suplementos_proteicos': dryMatterIntake * 0.25,

@@ -15,12 +15,13 @@ export const faoIngredientCategories = {
   },
   pastos_verdes: {
     name: {
-      es: "Pastos Verdes",
-      en: "Green Pastures",
-      de: "Grünfutter"
+      es: "Pastos Verdes (Uso Mínimo)",
+      en: "Green Pastures (Minimal Use)",
+      de: "Grünfutter (Minimaler Einsatz)"
     },
     emoji: "🌱",
-    color: "#10b981"
+    color: "#10b981",
+    note: "Solo para fibra mínima en sistema intensivo (0-5%)"
   },
   ensilados: {
     name: {
