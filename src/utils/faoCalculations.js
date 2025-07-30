@@ -23,14 +23,16 @@ export const convertNetToMetabolizable = (netEnergy, efficiency = 0.67) => {
 };
 
 /**
- * Calcula energía para actividad/forrajeo
- * Ef = 1.8/1000 × W × d (MJ ME/día)
+ * Calcula energía para actividad en sistema intensivo (confinamiento)
+ * Actividad mínima: 10% de la energía de mantenimiento
  * @param {number} weight - Peso corporal en kg
- * @param {number} distance - Distancia diaria recorrida en km (default 2 km)
+ * @param {number} activityFactor - Factor de actividad (default 0.1 para confinamiento)
  * @returns {number} Energía para actividad en MJ ME/día
  */
-export const calculateActivityEnergy = (weight, distance = 2) => {
-  return (1.8 / 1000) * weight * distance;
+export const calculateActivityEnergy = (weight, activityFactor = 0.1) => {
+  const maintenanceNE = calculateMaintenanceNetEnergy(weight);
+  const maintenanceME = convertNetToMetabolizable(maintenanceNE);
+  return maintenanceME * activityFactor;
 };
 
 /**
@@ -44,16 +46,16 @@ export const calculateGrowthEnergy = (dailyGain) => {
 };
 
 /**
- * Calcula el requerimiento total de energía metabolizable
+ * Calcula el requerimiento total de energía metabolizable para sistema intensivo
  * @param {number} weight - Peso corporal en kg
  * @param {number} dailyGain - Ganancia diaria en kg
- * @param {number} distance - Distancia diaria recorrida en km
+ * @param {number} activityFactor - Factor de actividad (default 0.1 para confinamiento)
  * @returns {object} Desglose de energía requerida
  */
-export const calculateTotalEnergyRequirement = (weight, dailyGain, distance = 2) => {
+export const calculateTotalEnergyRequirement = (weight, dailyGain, activityFactor = 0.1) => {
   const maintenanceNE = calculateMaintenanceNetEnergy(weight);
   const maintenanceME = convertNetToMetabolizable(maintenanceNE);
-  const activityME = calculateActivityEnergy(weight, distance);
+  const activityME = calculateActivityEnergy(weight, activityFactor);
   const growthME = calculateGrowthEnergy(dailyGain);
   
   const totalME = maintenanceME + activityME + growthME;
@@ -68,45 +70,46 @@ export const calculateTotalEnergyRequirement = (weight, dailyGain, distance = 2)
 };
 
 /**
- * Estima el consumo de materia seca basado en peso corporal
- * Generalmente 2-3% del peso corporal para animales en crecimiento
+ * Estima el consumo de materia seca para sistema intensivo
+ * Mayor consumo debido a dietas más concentradas y palatables
  * @param {number} weight - Peso corporal en kg
  * @param {string} category - Categoría del animal
  * @returns {number} Consumo de materia seca en kg/día
  */
 export const estimateDryMatterIntake = (weight, category) => {
   const intakePercentages = {
-    becerro_destetado: 0.028, // 2.8% del peso corporal
-    torete: 0.026, // 2.6%
-    novillo: 0.024, // 2.4%
-    novillo_final: 0.022, // 2.2%
-    toro_adulto: 0.020 // 2.0%
+    becerro_destetado: 0.032, // 3.2% del peso corporal - sistema intensivo
+    torete: 0.030, // 3.0%
+    novillo: 0.028, // 2.8%
+    novillo_final: 0.026, // 2.6%
+    toro_adulto: 0.022 // 2.2%
   };
   
-  const percentage = intakePercentages[category] || 0.024;
+  const percentage = intakePercentages[category] || 0.028;
   return weight * percentage;
 };
 
 /**
- * Tabla de requerimientos de nutrientes basada en NASEM/OSU
- * Interpolación para diferentes pesos y ganancias
+ * Tabla de requerimientos de nutrientes para sistema intensivo de engorde
+ * Basada en NASEM/OSU adaptada para mayores ganancias de peso
  */
 const nasemNutrientTable = [
   // Peso (kg), Ganancia (kg/día), CP (%), Ca (%), P (%), MS intake (% peso)
-  { weight: 200, gain: 0.5, cp: 14.5, ca: 0.31, p: 0.18, dmIntake: 2.8 },
-  { weight: 200, gain: 0.7, cp: 16.2, ca: 0.35, p: 0.20, dmIntake: 2.9 },
-  { weight: 250, gain: 0.6, cp: 13.8, ca: 0.29, p: 0.17, dmIntake: 2.7 },
-  { weight: 250, gain: 0.8, cp: 15.5, ca: 0.33, p: 0.19, dmIntake: 2.8 },
-  { weight: 300, gain: 0.7, cp: 13.2, ca: 0.27, p: 0.16, dmIntake: 2.6 },
-  { weight: 300, gain: 0.9, cp: 14.8, ca: 0.31, p: 0.18, dmIntake: 2.7 },
-  { weight: 400, gain: 0.9, cp: 12.5, ca: 0.25, p: 0.15, dmIntake: 2.5 },
-  { weight: 400, gain: 1.1, cp: 14.0, ca: 0.29, p: 0.17, dmIntake: 2.6 },
-  { weight: 500, gain: 1.0, cp: 11.8, ca: 0.23, p: 0.14, dmIntake: 2.4 },
-  { weight: 500, gain: 1.2, cp: 13.2, ca: 0.27, p: 0.16, dmIntake: 2.5 },
-  { weight: 600, gain: 1.1, cp: 11.2, ca: 0.21, p: 0.13, dmIntake: 2.3 },
-  { weight: 600, gain: 1.3, cp: 12.5, ca: 0.25, p: 0.15, dmIntake: 2.4 },
-  { weight: 700, gain: 0.0, cp: 9.5, ca: 0.18, p: 0.12, dmIntake: 2.0 }, // mantenimiento
-  { weight: 800, gain: 0.0, cp: 9.0, ca: 0.16, p: 0.11, dmIntake: 2.0 }
+  // Sistema intensivo - mayores ganancias y consumos
+  { weight: 200, gain: 1.0, cp: 16.5, ca: 0.38, p: 0.22, dmIntake: 3.2 },
+  { weight: 200, gain: 1.2, cp: 18.0, ca: 0.42, p: 0.25, dmIntake: 3.3 },
+  { weight: 250, gain: 1.1, cp: 15.8, ca: 0.36, p: 0.21, dmIntake: 3.1 },
+  { weight: 250, gain: 1.3, cp: 17.2, ca: 0.40, p: 0.24, dmIntake: 3.2 },
+  { weight: 300, gain: 1.2, cp: 15.0, ca: 0.34, p: 0.20, dmIntake: 3.0 },
+  { weight: 300, gain: 1.4, cp: 16.5, ca: 0.38, p: 0.23, dmIntake: 3.1 },
+  { weight: 400, gain: 1.4, cp: 14.2, ca: 0.32, p: 0.19, dmIntake: 2.8 },
+  { weight: 400, gain: 1.6, cp: 15.5, ca: 0.36, p: 0.22, dmIntake: 2.9 },
+  { weight: 500, gain: 1.5, cp: 13.5, ca: 0.30, p: 0.18, dmIntake: 2.7 },
+  { weight: 500, gain: 1.7, cp: 14.8, ca: 0.34, p: 0.21, dmIntake: 2.8 },
+  { weight: 600, gain: 1.6, cp: 12.8, ca: 0.28, p: 0.17, dmIntake: 2.6 },
+  { weight: 600, gain: 1.8, cp: 14.0, ca: 0.32, p: 0.20, dmIntake: 2.7 },
+  { weight: 700, gain: 0.0, cp: 9.5, ca: 0.18, p: 0.12, dmIntake: 2.2 }, // mantenimiento
+  { weight: 800, gain: 0.0, cp: 9.0, ca: 0.16, p: 0.11, dmIntake: 2.2 }
 ];
 
 /**
@@ -151,9 +154,9 @@ export const interpolateNutrientRequirements = (weight, dailyGain) => {
  * @returns {object} Requerimientos completos
  */
 export const calculateCompleteNutrientRequirements = (animalData) => {
-  const { weight, dailyGain, category, distance = 2 } = animalData;
+  const { weight, dailyGain, category, activityFactor = 0.1 } = animalData;
   
-  const energyReq = calculateTotalEnergyRequirement(weight, dailyGain, distance);
+  const energyReq = calculateTotalEnergyRequirement(weight, dailyGain, activityFactor);
   const nutrientReq = interpolateNutrientRequirements(weight, dailyGain);
   
   return {

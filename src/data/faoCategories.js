@@ -8,18 +8,18 @@ export const faoCategories = {
       de: "Abgesetztes Kalb"
     },
     description: {
-      es: "Terneros machos recién destetados, alimentados con pastos y suplemento",
-      en: "Recently weaned male calves, fed with pasture and supplement",
-      de: "Kürzlich abgesetzte männliche Kälber, gefüttert mit Weide und Ergänzung"
+      es: "Terneros machos recién destetados en sistema intensivo de engorde",
+      en: "Recently weaned male calves in intensive feedlot system",
+      de: "Kürzlich abgesetzte männliche Kälber im intensiven Mastsystem"
     },
     emoji: "🐄",
     weightRange: { min: 150, max: 250 },
     ageRange: { min: 4, max: 8 }, // meses
-    dailyGainRange: { min: 0.5, max: 0.7 }, // kg/día
+    dailyGainRange: { min: 0.8, max: 1.2 }, // kg/día - sistema intensivo
     defaultValues: {
       weight: 200,
       age: 6,
-      dailyGain: 0.6
+      dailyGain: 1.0
     }
   },
   torete: {
@@ -30,18 +30,18 @@ export const faoCategories = {
       de: "Jungbulle"
     },
     description: {
-      es: "Machos jóvenes en crecimiento intermedio",
-      en: "Young males in intermediate growth",
-      de: "Junge Männchen im mittleren Wachstum"
+      es: "Machos jóvenes en engorde intensivo intermedio",
+      en: "Young males in intermediate intensive fattening",
+      de: "Junge Männchen in mittlerer intensiver Mast"
     },
     emoji: "🐂",
     weightRange: { min: 250, max: 350 },
     ageRange: { min: 8, max: 14 },
-    dailyGainRange: { min: 0.7, max: 0.9 },
+    dailyGainRange: { min: 1.0, max: 1.4 }, // sistema intensivo
     defaultValues: {
       weight: 300,
       age: 11,
-      dailyGain: 0.8
+      dailyGain: 1.2
     }
   },
   novillo: {
@@ -52,18 +52,18 @@ export const faoCategories = {
       de: "Ochse"
     },
     description: {
-      es: "Machos castrados en fase de recría",
-      en: "Castrated males in rearing phase",
-      de: "Kastrierte Männchen in der Aufzuchtphase"
+      es: "Machos castrados en engorde intensivo avanzado",
+      en: "Castrated males in advanced intensive fattening",
+      de: "Kastrierte Männchen in fortgeschrittener intensiver Mast"
     },
     emoji: "🐃",
     weightRange: { min: 350, max: 450 },
     ageRange: { min: 14, max: 20 },
-    dailyGainRange: { min: 0.9, max: 1.0 },
+    dailyGainRange: { min: 1.2, max: 1.6 }, // sistema intensivo
     defaultValues: {
       weight: 400,
       age: 17,
-      dailyGain: 0.95
+      dailyGain: 1.4
     }
   },
   novillo_final: {
@@ -74,18 +74,18 @@ export const faoCategories = {
       de: "Mastochse (Endmast)"
     },
     description: {
-      es: "Machos destinados al sacrificio, ración con mayor energía",
-      en: "Males destined for slaughter, higher energy ration",
-      de: "Für die Schlachtung bestimmte Männchen, energiereichere Ration"
+      es: "Machos en engorde intensivo final, máxima ganancia de peso",
+      en: "Males in final intensive fattening, maximum weight gain",
+      de: "Männchen in der finalen intensiven Mast, maximale Gewichtszunahme"
     },
     emoji: "🥩",
     weightRange: { min: 450, max: 650 },
     ageRange: { min: 20, max: 24 },
-    dailyGainRange: { min: 1.0, max: 1.2 },
+    dailyGainRange: { min: 1.4, max: 1.8 }, // sistema intensivo final
     defaultValues: {
       weight: 550,
       age: 22,
-      dailyGain: 1.1
+      dailyGain: 1.6
     }
   },
   toro_adulto: {

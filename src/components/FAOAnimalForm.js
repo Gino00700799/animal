@@ -8,7 +8,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
     weight: '',
     age: '',
     dailyGain: '',
-    distance: 2, // km diarios de pastoreo
+    activityFactor: 0.1, // factor de actividad para confinamiento
     breed: '',
     errors: {}
   });
@@ -68,13 +68,13 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         }
         break;
         
-      case 'distance':
-        if (!value || parseFloat(value) < 0) {
-          errors.distance = 'La distancia no puede ser negativa';
-        } else if (parseFloat(value) > 10) {
-          errors.distance = 'Distancia muy alta (máximo 10 km/día)';
+      case 'activityFactor':
+        if (!value || parseFloat(value) < 0.05) {
+          errors.activityFactor = 'El factor de actividad debe ser al menos 0.05';
+        } else if (parseFloat(value) > 0.5) {
+          errors.activityFactor = 'Factor de actividad muy alto (máximo 0.5)';
         } else {
-          delete errors.distance;
+          delete errors.activityFactor;
         }
         break;
         
@@ -101,7 +101,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         weight: parseFloat(newData.weight),
         age: parseFloat(newData.age),
         dailyGain: parseFloat(newData.dailyGain),
-        distance: parseFloat(newData.distance),
+        activityFactor: parseFloat(newData.activityFactor),
         breed: newData.breed,
         category: selectedCategory?.id
       });
@@ -218,29 +218,28 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
           </p>
         </div>
 
-        {/* Distancia de Pastoreo */}
+        {/* Factor de Actividad */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            <MapPin className="w-4 h-4 inline mr-1" />
-            Distancia de Pastoreo (km/día)
+            🏠 Factor de Actividad
           </label>
           <input
             type="number"
-            value={animalData.distance}
-            onChange={(e) => handleInputChange('distance', e.target.value)}
+            value={animalData.activityFactor}
+            onChange={(e) => handleInputChange('activityFactor', e.target.value)}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              animalData.errors.distance ? 'border-red-500' : 'border-gray-300'
+              animalData.errors.activityFactor ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="2.0 km/día"
-            min="0"
-            max="10"
-            step="0.5"
+            placeholder="0.1"
+            min="0.05"
+            max="0.5"
+            step="0.05"
           />
-          {animalData.errors.distance && (
-            <p className="text-red-500 text-xs mt-1">{animalData.errors.distance}</p>
+          {animalData.errors.activityFactor && (
+            <p className="text-red-500 text-xs mt-1">{animalData.errors.activityFactor}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">
-            Distancia promedio diaria de caminata/pastoreo
+            0.1 = confinamiento intensivo, 0.2 = semi-intensivo, 0.3 = extensivo
           </p>
         </div>
 
