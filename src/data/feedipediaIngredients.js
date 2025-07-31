@@ -5,9 +5,9 @@ export const feedipediaIngredients = [
   {
     id: "medicago_sativa_heu",
     name: {
-      es: "Heno de Alfalfa",
-      en: "Alfalfa Hay", 
-      de: "Luzerne (Heu)"
+      es: "Heno de Alfalfa (Análisis Científico)",
+      en: "Alfalfa Hay (Scientific Analysis)", 
+      de: "Luzerne Heu (Wissenschaftliche Analyse)"
     },
     scientificName: "Medicago sativa",
     category: "forrajes_secos",
@@ -133,9 +133,9 @@ export const feedipediaIngredients = [
   {
     id: "cynodon_dactylon",
     name: {
-      es: "Heno de Bermuda",
-      en: "Bermuda Grass Hay",
-      de: "Bermudagras-Heu"
+      es: "Heno de Bermuda (Análisis Científico)",
+      en: "Bermuda Grass Hay (Scientific Analysis)",
+      de: "Bermudagras-Heu (Wissenschaftliche Analyse)"
     },
     scientificName: "Cynodon dactylon",
     category: "forrajes_secos",

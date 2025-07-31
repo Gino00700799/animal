@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { Check, Plus, Minus, Info, Microscope, Filter, Globe, AlertTriangle } from 'lucide-react';
+import { Check, Plus, Minus, Info, Microscope, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { faoIngredientCategories, getAllIngredients, getIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
+import { faoIngredientCategories, getIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
 import { evaluateFormulationComplexity } from '../utils/ingredientComplexityManager';
 import DetailedNutritionView from './DetailedNutritionView';
-import FeedipediaIngredientCard from './FeedipediaIngredientCard';
 
 const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, animalData }) => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('forrajes_secos');
   const [showDetails, setShowDetails] = useState({});
   const [selectedForDetailView, setSelectedForDetailView] = useState(null);
-  const [viewMode, setViewMode] = useState('all'); // 'all', 'fao', 'feedipedia'
   const [showAdvancedDetails, setShowAdvancedDetails] = useState(false);
 
   const toggleIngredient = (ingredient) => {
@@ -31,13 +29,9 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     }));
   };
 
-  const allCategoryIngredients = getIngredientsByCategory(activeCategory);
-  
-  // Filter basierend auf View-Modus
-  const categoryIngredients = allCategoryIngredients.filter(ingredient => {
-    if (viewMode === 'fao') return !ingredient.scientificName; // Ursprüngliche FAO-Ingredienzien
-    if (viewMode === 'feedipedia') return ingredient.scientificName; // Feedipedia-Ingredienzien
-    return true; // Alle anzeigen
+  // Solo ingredientes FAO estándar
+  const categoryIngredients = getIngredientsByCategory(activeCategory).filter(ingredient => {
+    return !ingredient.scientificName; // Solo ingredientes FAO originales
   });
 
   // Función para calcular el estado nutricional actual
@@ -218,37 +212,11 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
         </div>
       </div>
 
-      {/* View Mode Filter */}
+      {/* Información de ingredientes FAO */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Filter className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Datenquelle:</span>
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode('all')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-              }`}
-            >
-              Alle ({allCategoryIngredients.length})
-            </button>
-            <button
-              onClick={() => setViewMode('fao')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'fao' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-              }`}
-            >
-              FAO Standard
-            </button>
-            <button
-              onClick={() => setViewMode('feedipedia')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                viewMode === 'feedipedia' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-              }`}
-            >
-              <Globe className="w-3 h-3 inline mr-1" />
-              Feedipedia
-            </button>
+          <div className="text-sm font-medium text-gray-700">
+            📊 Ingredientes FAO Estándar: {categoryIngredients.length} disponibles
           </div>
         </div>
         
@@ -432,20 +400,7 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
           const canSelect = canSelectIngredient(ingredient);
           const disabledReason = getDisabledReason(ingredient);
           
-          // Usar Feedipedia-Karte für wissenschaftliche Ingredienzien
-          if (ingredient.scientificName) {
-            return (
-              <FeedipediaIngredientCard
-                key={ingredient.id}
-                ingredient={ingredient}
-                isSelected={isSelected}
-                onToggle={() => toggleIngredient(ingredient)}
-                showDetails={showAdvancedDetails}
-                canSelect={canSelect}
-                disabledReason={disabledReason}
-              />
-            );
-          }
+          // Solo ingredientes FAO estándar (sin Feedipedia)
           
           // Ursprüngliche FAO-Karte für Standard-Ingredienzien
           const showDetail = showDetails[ingredient.id];
