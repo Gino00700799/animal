@@ -2,6 +2,8 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Download, AlertTriangle, CheckCircle, TrendingUp, DollarSign, Droplets } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import NutritionWarnings from './NutritionWarnings';
+import NutritionAdequacyChart from './NutritionAdequacyChart';
 
 const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimizedDiet, validation }) => {
   const { language } = useLanguage();
@@ -97,14 +99,24 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
         </div>
       </div>
 
+      {/* Nutrition Warnings - Neue Warnungen für Energie und Trockensubstanz */}
+      <NutritionWarnings 
+        animalData={animalData}
+        optimizedDiet={optimizedDiet}
+        requirements={requirements}
+      />
+
       {/* Métricas clave */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center">
           <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{requirements.energy.totalME}</div>
           <div className="text-sm text-gray-600">MJ ME/día requeridos</div>
-          <div className="text-xs text-green-600 mt-1">
-            {optimizedDiet.adequacy.energy}% cubierto
+          <div className={`text-xs mt-1 ${
+            optimizedDiet.adequacy.energy > 120 ? 'text-yellow-600' :
+            optimizedDiet.adequacy.energy >= 90 ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {optimizedDiet.adequacy.energy.toFixed(1)}% cubierto
           </div>
         </div>
 
@@ -112,8 +124,11 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
           <div className="text-2xl mb-2">💪</div>
           <div className="text-2xl font-bold text-gray-800">{requirements.nutrients.crudeProteinRequired}</div>
           <div className="text-sm text-gray-600">kg proteína/día</div>
-          <div className="text-xs text-green-600 mt-1">
-            {optimizedDiet.adequacy.protein}% cubierto
+          <div className={`text-xs mt-1 ${
+            optimizedDiet.adequacy.protein < 85 ? 'text-red-600' :
+            optimizedDiet.adequacy.protein >= 90 && optimizedDiet.adequacy.protein <= 110 ? 'text-green-600' : 'text-yellow-600'
+          }`}>
+            {optimizedDiet.adequacy.protein.toFixed(1)}% cubierto
           </div>
         </div>
 
@@ -121,6 +136,17 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
           <Droplets className="w-8 h-8 text-cyan-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{requirements.waterRequirement}</div>
           <div className="text-sm text-gray-600">litros agua/día</div>
+        </div>
+
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center">
+          <div className="text-2xl mb-2">🌾</div>
+          <div className="text-2xl font-bold text-gray-800">{optimizedDiet.totalNutrients.dryMatter.toFixed(1)}</div>
+          <div className="text-sm text-gray-600">kg Trockensubstanz/Tag</div>
+          <div className={`text-xs mt-1 ${
+            optimizedDiet.totalNutrients.dryMatter < (animalData.weight * 0.025) ? 'text-red-600' : 'text-green-600'
+          }`}>
+            {((optimizedDiet.totalNutrients.dryMatter / animalData.weight) * 100).toFixed(1)}% vom Körpergewicht
+          </div>
         </div>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center">
@@ -157,19 +183,8 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
           </ResponsiveContainer>
         </div>
 
-        {/* Adecuación nutricional */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Adecuación Nutricional (%)</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={nutritionAdequacyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="nutrient" />
-              <YAxis />
-              <Tooltip formatter={(value) => [`${value}%`, 'Adecuación']} />
-              <Bar dataKey="adequacy" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {/* Adecuación nutricional - Verbesserte Version mit Zielbereichen */}
+        <NutritionAdequacyChart nutritionAdequacyData={nutritionAdequacyData} />
       </div>
 
       {/* Composición Detallada de la Dieta */}

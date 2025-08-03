@@ -29,10 +29,8 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     }));
   };
 
-  // Solo ingredientes FAO estándar
-  const categoryIngredients = getIngredientsByCategory(activeCategory).filter(ingredient => {
-    return !ingredient.scientificName; // Solo ingredientes FAO originales
-  });
+  // Todos los ingredientes de la categoría (FAO estándar + nuevos)
+  const categoryIngredients = getIngredientsByCategory(activeCategory);
 
   // Función para calcular el estado nutricional actual
   const calculateCurrentNutrition = () => {
@@ -204,10 +202,14 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
         <div className="text-2xl mr-3">🌾</div>
         <div>
           <h3 className="text-xl font-bold text-gray-800">
-            Selección de Ingredientes FAO
+            {language === 'en' ? 'FAO Ingredient Selection' : 
+             language === 'de' ? 'FAO Futtermittel-Auswahl' : 
+             'Selección de Ingredientes FAO'}
           </h3>
           <p className="text-gray-600 text-sm">
-            Selecciona los ingredientes disponibles para formular la dieta
+            {language === 'en' ? 'Select available ingredients to formulate the diet' :
+             language === 'de' ? 'Verfügbare Futtermittel für die Rationsformulierung auswählen' :
+             'Selecciona los ingredientes disponibles para formular la dieta'}
           </p>
         </div>
       </div>
@@ -216,7 +218,7 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-sm font-medium text-gray-700">
-            📊 Ingredientes FAO Estándar: {categoryIngredients.length} disponibles
+            📊 Ingredientes FAO: {categoryIngredients.length} disponibles en {faoIngredientCategories[activeCategory]?.name[language] || faoIngredientCategories[activeCategory]?.name.es}
           </div>
         </div>
         

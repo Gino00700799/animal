@@ -13,7 +13,7 @@ const AppContent = () => {
   const [selectedBreed, setSelectedBreed] = useState(null);
   const [measurements, setMeasurements] = useState(null);
   const [showResults, setShowResults] = useState(false);
-  const [currentCalculator, setCurrentCalculator] = useState('original'); // 'original' or 'fao'
+  const [currentCalculator, setCurrentCalculator] = useState('fao'); // Only FAO calculator
   const { t } = useLanguage();
 
   const handleCountrySelect = (countryCode) => {
@@ -62,16 +62,6 @@ const AppContent = () => {
               {/* Calculator Toggle */}
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <button
-                  onClick={() => setCurrentCalculator('original')}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                    currentCalculator === 'original'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  🐄 Básico
-                </button>
-                <button
                   onClick={() => setCurrentCalculator('fao')}
                   className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                     currentCalculator === 'fao'
@@ -101,99 +91,8 @@ const AppContent = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentCalculator === 'fao' ? (
-          /* FAO Professional Calculator */
-          <FAODietCalculator />
-        ) : (
-          /* Original Calculator */
-          <>
-            {!showResults ? (
-              <>
-                {/* Hero Section */}
-                <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold text-gray-800 mb-4">
-                    {t('cattleHeroTitle')}
-                  </h2>
-                  <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    {t('cattleHeroSubtitle')}
-                  </p>
-                </div>
-
-                {/* Country Selection */}
-                <section className="mb-12">
-                  <CountrySelector
-                    selectedCountry={selectedCountry}
-                    onCountrySelect={handleCountrySelect}
-                  />
-                </section>
-
-                {/* Breed Selection */}
-                <section className="mb-12">
-                  <BreedSelector
-                    selectedCountry={selectedCountry}
-                    selectedBreed={selectedBreed}
-                    onBreedSelect={handleBreedSelect}
-                  />
-                </section>
-
-                {/* Calculation Form */}
-                <section>
-                  <CalculationForm
-                    animal={selectedBreed}
-                    onCalculate={handleCalculate}
-                  />
-                </section>
-              </>
-            ) : (
-              /* Results Display */
-              <ResultsDisplay
-                animal={selectedBreed}
-                measurements={measurements}
-                onReset={handleReset}
-              />
-            )}
-          </>
-        )}
-
-        {/* Features Section */}
-        {currentCalculator === 'original' && !showResults && (
-          <section className="mt-16 mb-12">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-                Why Use Our Calculator?
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center p-6 bg-white/60 rounded-xl">
-                <div className="text-4xl mb-4">🔬</div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                  Scientific Accuracy
-                </h4>
-                <p className="text-gray-600">
-                  Based on metabolic research and veterinary nutritional guidelines
-                </p>
-              </div>
-              <div className="text-center p-6 bg-white/60 rounded-xl">
-                <div className="text-4xl mb-4">📊</div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                  Visual Analytics
-                </h4>
-                <p className="text-gray-600">
-                  Interactive charts and comparisons for better understanding
-                </p>
-              </div>
-              <div className="text-center p-6 bg-white/60 rounded-xl">
-                <div className="text-4xl mb-4">🎯</div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                  Practical Recommendations
-                </h4>
-                <p className="text-gray-600">
-                  Actionable feeding guidelines and care tips
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
+        {/* FAO Professional Calculator */}
+        <FAODietCalculator />
       </main>
 
       {/* Footer */}
@@ -201,20 +100,19 @@ const AppContent = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <span className="text-gray-600">Made with</span>
+              <span className="text-gray-600">{t('madeWith')}</span>
               <Heart className="w-4 h-4 text-red-500" />
-              <span className="text-gray-600">by Rovo Dev</span>
+              <span className="text-gray-600">{t('by')}</span>
             </div>
             <p className="text-sm text-gray-500 mb-4">
-              This calculator provides estimates for educational purposes. 
-              Always consult with veterinary professionals for actual animal care.
+              {t('disclaimer')}
             </p>
             <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
               <span>© 2024 Exotic Animal Calculator</span>
               <span>•</span>
-              <button className="hover:text-gray-700 transition-colors">Privacy Policy</button>
+              <button className="hover:text-gray-700 transition-colors">{t('privacyPolicy')}</button>
               <span>•</span>
-              <button className="hover:text-gray-700 transition-colors">Terms of Service</button>
+              <button className="hover:text-gray-700 transition-colors">{t('termsOfService')}</button>
             </div>
           </div>
         </div>

@@ -2,8 +2,11 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Wheat, Droplets, Zap, TrendingUp, Info, Calculator } from 'lucide-react';
 import { getCattleNutritionForWeight, calculateCattleFeedRequirements, nutritionExplanations, cattleNutritionData } from '../data/cattleNutrition';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CattleNutritionDisplay = ({ animal, measurements }) => {
+  const { t, language } = useLanguage();
+  
   if (!animal || !measurements || !['bull', 'cow', 'calf'].includes(animal.id)) {
     return null;
   }
@@ -13,15 +16,15 @@ const CattleNutritionDisplay = ({ animal, measurements }) => {
 
   // Data for charts
   const nutritionChartData = [
-    { name: 'Trockenmasse', value: nutritionData.tmKg, color: '#8b5cf6', unit: 'kg' },
-    { name: 'TDN (Energie)', value: nutritionData.tdnKg, color: '#06b6d4', unit: 'kg' },
-    { name: 'Protein (DCP)', value: nutritionData.dcpKg, color: '#10b981', unit: 'kg' }
+    { name: t('dryMatter'), value: nutritionData.tmKg, color: '#8b5cf6', unit: 'kg' },
+    { name: t('tdnEnergy'), value: nutritionData.tdnKg, color: '#06b6d4', unit: 'kg' },
+    { name: t('proteinDcp'), value: nutritionData.dcpKg, color: '#10b981', unit: 'kg' }
   ];
 
   const feedTypeData = [
-    { name: 'Heu', value: feedRequirements.hayKg, color: '#f59e0b' },
-    { name: 'Kraftfutter', value: feedRequirements.concentrateKg, color: '#ef4444' },
-    { name: 'Silage', value: feedRequirements.silageKg, color: '#10b981' }
+    { name: t('hay'), value: feedRequirements.hayKg, color: '#f59e0b' },
+    { name: t('concentrate'), value: feedRequirements.concentrateKg, color: '#ef4444' },
+    { name: t('silage'), value: feedRequirements.silageKg, color: '#10b981' }
   ];
 
   const phaseComparisonData = cattleNutritionData.map(data => ({
@@ -41,15 +44,15 @@ const CattleNutritionDisplay = ({ animal, measurements }) => {
             <div className="text-3xl">🐂</div>
             <div>
               <h3 className="text-2xl font-bold text-yellow-800">
-                Professionelle Rinder-Ernährung
+                {t('professionalCattleNutrition')}
               </h3>
               <p className="text-yellow-700">
-                Wissenschaftlich basierte Fütterungsempfehlungen für {animal.name}
+                {t('scientificFeedingRecommendations')} {animal.name}
               </p>
             </div>
           </div>
           <div className="bg-yellow-200 px-4 py-2 rounded-lg">
-            <div className="text-sm text-yellow-800 font-medium">Gewicht: {measurements.weight}kg</div>
+            <div className="text-sm text-yellow-800 font-medium">{t('weight')}: {measurements.weight}kg</div>
             <div className="text-xs text-yellow-700">{nutritionData.phase}</div>
           </div>
         </div>
@@ -57,18 +60,18 @@ const CattleNutritionDisplay = ({ animal, measurements }) => {
         {/* Current Phase Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white/70 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Entwicklungsphase</div>
+            <div className="text-sm text-gray-600">{t('developmentPhase')}</div>
             <div className="font-bold text-gray-800">{nutritionData.phase}</div>
             <div className="text-xs text-gray-500">{nutritionData.ageMonths}</div>
           </div>
           <div className="bg-white/70 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Beschreibung</div>
+            <div className="text-sm text-gray-600">{t('description')}</div>
             <div className="font-medium text-gray-800">{nutritionData.description}</div>
           </div>
           <div className="bg-white/70 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Tägliche Kosten</div>
+            <div className="text-sm text-gray-600">{t('dailyCosts')}</div>
             <div className="font-bold text-green-600">{feedRequirements.dailyCostEuro}€</div>
-            <div className="text-xs text-gray-500">Geschätzte Futterkosten</div>
+            <div className="text-xs text-gray-500">{t('estimatedFeedCosts')}</div>
           </div>
         </div>
       </div>
@@ -78,29 +81,29 @@ const CattleNutritionDisplay = ({ animal, measurements }) => {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center border-l-4 border-purple-500">
           <Wheat className="w-8 h-8 text-purple-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{nutritionData.tmKg}</div>
-          <div className="text-sm text-gray-600">kg Trockenmasse/Tag</div>
-          <div className="text-xs text-purple-600 mt-1">Gesamtfutterbedarf</div>
+          <div className="text-sm text-gray-600">kg {t('dryMatter')}/Tag</div>
+          <div className="text-xs text-purple-600 mt-1">{t('totalFeedRequirement')}</div>
         </div>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center border-l-4 border-cyan-500">
           <Zap className="w-8 h-8 text-cyan-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{nutritionData.tdnKg}</div>
           <div className="text-sm text-gray-600">kg TDN/Tag</div>
-          <div className="text-xs text-cyan-600 mt-1">Energiebedarf</div>
+          <div className="text-xs text-cyan-600 mt-1">{t('energyRequirement')}</div>
         </div>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center border-l-4 border-green-500">
           <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{nutritionData.dcpKg}</div>
           <div className="text-sm text-gray-600">kg DCP/Tag</div>
-          <div className="text-xs text-green-600 mt-1">Proteinbedarf</div>
+          <div className="text-xs text-green-600 mt-1">{t('proteinRequirement')}</div>
         </div>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center border-l-4 border-blue-500">
           <Droplets className="w-8 h-8 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">{feedRequirements.waterLiters}</div>
-          <div className="text-sm text-gray-600">Liter Wasser/Tag</div>
-          <div className="text-xs text-blue-600 mt-1">Wasserbedarf</div>
+          <div className="text-sm text-gray-600">Liter {t('water')}/Tag</div>
+          <div className="text-xs text-blue-600 mt-1">{t('waterRequirement')}</div>
         </div>
       </div>
 

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { Info, ChevronDown, ChevronUp, Microscope, Zap } from 'lucide-react';
 import { detailedNutritionData, evaluateProteinQuality, estimateDigestibility } from '../data/detailedNutritionData';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const DetailedNutritionView = ({ ingredient }) => {
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState('main');
   const [showDetails, setShowDetails] = useState(false);
   
@@ -13,7 +15,7 @@ const DetailedNutritionView = ({ ingredient }) => {
     return (
       <div className="bg-gray-50 p-4 rounded-lg text-center">
         <Microscope className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-        <p className="text-gray-600">Keine detaillierten Analysedaten verfügbar</p>
+        <p className="text-gray-600">{t('noDetailedDataAvailable')}</p>
       </div>
     );
   }
@@ -43,14 +45,14 @@ const DetailedNutritionView = ({ ingredient }) => {
         <div className="flex items-center space-x-3">
           <Microscope className="w-6 h-6 text-blue-500" />
           <h3 className="text-lg font-semibold text-gray-800">
-            Detaillierte Nährstoffanalyse
+            {t('detailedNutritionAnalysis')}
           </h3>
         </div>
         <button
           onClick={() => setShowDetails(!showDetails)}
           className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
         >
-          <span className="text-sm">Details</span>
+          <span className="text-sm">{t('details')}</span>
           {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
@@ -58,10 +60,10 @@ const DetailedNutritionView = ({ ingredient }) => {
       {/* Tab Navigation */}
       <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
         {[
-          { id: 'main', label: 'Hauptanalyse', icon: '📊' },
-          { id: 'minerals', label: 'Mineralien', icon: '⚗️' },
-          { id: 'amino', label: 'Aminosäuren', icon: '🧬' },
-          { id: 'digestibility', label: 'Verdaulichkeit', icon: '🔄' }
+          { id: 'main', label: t('mainAnalysis'), icon: '📊' },
+          { id: 'minerals', label: t('minerals'), icon: '⚗️' },
+          { id: 'amino', label: t('aminoAcids'), icon: '🧬' },
+          { id: 'digestibility', label: t('digestibility'), icon: '🔄' }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -83,7 +85,7 @@ const DetailedNutritionView = ({ ingredient }) => {
         {/* Hauptanalyse */}
         {activeTab === 'main' && detailedData.mainAnalysis && (
           <div>
-            <h4 className="font-semibold text-gray-800 mb-4">Hauptnährstoffe</h4>
+            <h4 className="font-semibold text-gray-800 mb-4">{t('mainNutrients')}</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {Object.entries(detailedData.mainAnalysis).map(([key, data]) => (
                 <div key={key} className="bg-gray-50 p-3 rounded-lg">

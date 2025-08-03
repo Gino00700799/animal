@@ -113,10 +113,10 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
       <div className="bg-gray-50 rounded-xl p-8 text-center">
         <div className="text-4xl mb-4">🐂</div>
         <h3 className="text-lg font-semibold text-gray-600 mb-2">
-          Selecciona una Categoría
+          {t('selectCategory')}
         </h3>
         <p className="text-gray-500">
-          Primero selecciona una categoría FAO para continuar con los datos del animal
+          {t('selectCategoryFirst')}
         </p>
       </div>
     );
@@ -131,10 +131,10 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         <span className="text-2xl mr-3">{selectedCategory.emoji}</span>
         <div>
           <h3 className="text-xl font-bold text-gray-800">
-            Datos del Animal - {selectedCategory.name.es}
+            {t('animalData')} - {selectedCategory.name[language] || selectedCategory.name.es}
           </h3>
           <p className="text-gray-600 text-sm">
-            Ingresa los datos específicos del animal para calcular requerimientos
+            {t('enterAnimalData')}
           </p>
         </div>
       </div>
@@ -144,7 +144,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Scale className="w-4 h-4 inline mr-1" />
-            Peso Corporal (kg)
+            {t('bodyWeight')}
           </label>
           <input
             type="number"
@@ -162,7 +162,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
             <p className="text-red-500 text-xs mt-1">{animalData.errors.weight}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">
-            Rango recomendado: {selectedCategory.weightRange.min}-{selectedCategory.weightRange.max} kg
+            {t('recommendedRange')}: {selectedCategory.weightRange.min}-{selectedCategory.weightRange.max} kg
           </p>
         </div>
 
@@ -170,7 +170,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Calendar className="w-4 h-4 inline mr-1" />
-            Edad (meses)
+            {t('age')}
           </label>
           <input
             type="number"
@@ -188,7 +188,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
             <p className="text-red-500 text-xs mt-1">{animalData.errors.age}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">
-            Rango típico: {selectedCategory.ageRange.min}-{selectedCategory.ageRange.max} meses
+            {t('typicalRange')}: {selectedCategory.ageRange.min}-{selectedCategory.ageRange.max} meses
           </p>
         </div>
 
@@ -196,7 +196,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <TrendingUp className="w-4 h-4 inline mr-1" />
-            Ganancia Diaria Deseada (kg/día)
+            {t('dailyGain')}
           </label>
           <input
             type="number"

@@ -3,8 +3,10 @@ import { Calendar, TrendingUp, DollarSign, Calculator, BarChart3, Download } fro
 import { optimizeDiet } from '../utils/dietOptimization';
 import { calculateCompleteNutrientRequirements } from '../utils/faoCalculations';
 import { getAllIngredients } from '../data/faoIngredients';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredients }) => {
+  const { t, language } = useLanguage();
   const [periods, setPeriods] = useState(3); // Número de períodos (meses)
   const [results, setResults] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -120,10 +122,10 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
         <div className="text-center">
           <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Calculadora Multi-Período
+            {t('multiPeriodCalculator')}
           </h3>
           <p className="text-gray-600">
-            Selecciona una categoría de animal e ingredientes para calcular el engorde por períodos
+            {t('selectCategoryAndIngredients')}
           </p>
         </div>
       </div>
@@ -137,11 +139,11 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-800 flex items-center">
             <Calendar className="w-6 h-6 mr-2 text-blue-600" />
-            Análisis de Engorde Multi-Período
+            {t('multiPeriodAnalysis')}
           </h3>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium text-gray-700">Períodos:</label>
+              <label className="text-sm font-medium text-gray-700">{t('periods')}:</label>
               <select
                 value={periods}
                 onChange={(e) => setPeriods(parseInt(e.target.value))}
@@ -167,7 +169,7 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
             <div className="font-bold text-blue-800 text-lg">
               {results.summary.totalGain.toFixed(0)} kg
             </div>
-            <div className="text-sm text-blue-600">Ganancia Total</div>
+            <div className="text-sm text-blue-600">{t('totalGain')}</div>
           </div>
           
           <div className="bg-green-50 p-4 rounded-lg text-center">
@@ -175,7 +177,7 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
             <div className="font-bold text-green-800 text-lg">
               €{results.summary.totalCost.toFixed(0)}
             </div>
-            <div className="text-sm text-green-600">Costo Total</div>
+            <div className="text-sm text-green-600">{t('totalCost')}</div>
           </div>
           
           <div className="bg-purple-50 p-4 rounded-lg text-center">
@@ -183,7 +185,7 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
             <div className="font-bold text-purple-800 text-lg">
               €{results.summary.avgCostPerKg.toFixed(2)}
             </div>
-            <div className="text-sm text-purple-600">€/kg Ganancia</div>
+            <div className="text-sm text-purple-600">{t('costPerKgGain')}</div>
           </div>
           
           <div className="bg-yellow-50 p-4 rounded-lg text-center">
@@ -191,7 +193,7 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
             <div className="font-bold text-yellow-800 text-lg">
               {results.summary.roi.toFixed(1)}%
             </div>
-            <div className="text-sm text-yellow-600">ROI</div>
+            <div className="text-sm text-yellow-600">{t('roi')}</div>
           </div>
         </div>
       </div>
@@ -199,21 +201,21 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
       {/* Tabla detallada por período */}
       <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
         <h4 className="text-lg font-semibold text-gray-800 mb-4">
-          Desglose por Período
+          {t('breakdownByPeriod')}
         </h4>
         
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-2">Mes</th>
-                <th className="text-right py-2">Peso Inicial</th>
-                <th className="text-right py-2">Peso Final</th>
-                <th className="text-right py-2">Ganancia</th>
-                <th className="text-right py-2">Costo/Día</th>
-                <th className="text-right py-2">Costo/Mes</th>
-                <th className="text-right py-2">€/kg Ganancia</th>
-                <th className="text-right py-2">Acumulado</th>
+                <th className="text-left py-2">{t('month')}</th>
+                <th className="text-right py-2">{t('initialWeight')}</th>
+                <th className="text-right py-2">{t('finalWeight')}</th>
+                <th className="text-right py-2">{t('gain')}</th>
+                <th className="text-right py-2">{t('costPerDay')}</th>
+                <th className="text-right py-2">{t('costPerMonth')}</th>
+                <th className="text-right py-2">{t('costPerKgGain')}</th>
+                <th className="text-right py-2">{t('accumulated')}</th>
               </tr>
             </thead>
             <tbody>

@@ -1895,6 +1895,175 @@ export const faoIngredients = [
     costPerKg: 0.65,
     availability: "year_round",
     maxUsage: 1.0
+  },
+
+  // NEUE FUTTERMITTEL - Trockenfutter
+  {
+    id: "mixed_meadow_hay_fine",
+    name: {
+      es: "Heno de pradera mixta fino",
+      en: "Mixed meadow hay fine",
+      de: "Wiesenheu fein"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 86.4,
+      metabolizableEnergy: 7.8,
+      crudeProtein: 11.1,
+      crudeProteinDigestible: 7.8,
+      crudeFiber: 28.0,
+      calcium: 0.68,
+      phosphorus: 0.27,
+      ndf: 55.0,
+      adf: 32.0
+    },
+    costPerKg: 0.08,
+    availability: "seasonal",
+    description: {
+      es: "Heno de pradera natural mixta de alta calidad",
+      en: "High quality mixed natural meadow hay",
+      de: "Hochwertiges Wiesenheu aus Naturwiesen"
+    }
+  },
+
+  {
+    id: "clover_hay",
+    name: {
+      es: "Heno de trébol",
+      en: "Clover hay",
+      de: "Kleeheu"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 87.5,
+      metabolizableEnergy: 8.6,
+      crudeProtein: 11.7,
+      crudeProteinDigestible: 8.2,
+      crudeFiber: 26.5,
+      calcium: 1.89,
+      phosphorus: 0.24,
+      ndf: 48.0,
+      adf: 30.5
+    },
+    costPerKg: 0.11,
+    availability: "year_round",
+    description: {
+      es: "Heno de trébol rico en proteína y calcio",
+      en: "Protein and calcium rich clover hay",
+      de: "Protein- und calciumreiches Kleeheu"
+    }
+  },
+
+  {
+    id: "turnip_tops_hay_premium",
+    name: {
+      es: "Heno de hojas de nabo premium",
+      en: "Turnip tops hay premium",
+      de: "Rübenblattheu Premium"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 90.7,
+      metabolizableEnergy: 7.3,
+      crudeProtein: 8.9,
+      crudeProteinDigestible: 5.8,
+      crudeFiber: 32.0,
+      calcium: 0.60,
+      phosphorus: 0.24,
+      ndf: 58.0,
+      adf: 35.5
+    },
+    costPerKg: 0.16,
+    availability: "seasonal",
+    description: {
+      es: "Heno de hojas de nabo de calidad premium",
+      en: "Premium quality turnip tops hay",
+      de: "Premium Rübenblattheu"
+    }
+  },
+
+  {
+    id: "velvet_bean_hay_fine",
+    name: {
+      es: "Heno de frijol terciopelo fino",
+      en: "Velvet bean hay fine",
+      de: "Samtbohnenheu fein"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 89.3,
+      metabolizableEnergy: 8.5,
+      crudeProtein: 12.0,
+      crudeProteinDigestible: 8.5,
+      crudeFiber: 19.4,
+      calcium: 1.16,
+      phosphorus: 0.18,
+      ndf: 34.9,
+      adf: 15.5
+    },
+    costPerKg: 0.17,
+    availability: "year_round",
+    description: {
+      es: "Heno de leguminosa tropical rica en proteína",
+      en: "Protein-rich tropical legume hay",
+      de: "Proteinreiches Heu aus tropischen Leguminosen"
+    }
+  },
+
+  {
+    id: "wheat_chaff_elite",
+    name: {
+      es: "Paja de trigo elite",
+      en: "Wheat chaff elite",
+      de: "Weizenspreu Elite"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 85.3,
+      metabolizableEnergy: 7.7,
+      crudeProtein: 7.9,
+      crudeProteinDigestible: 4.6,
+      crudeFiber: 27.2,
+      calcium: 0.40,
+      phosphorus: 0.21,
+      ndf: 49.0,
+      adf: 21.8
+    },
+    costPerKg: 0.19,
+    availability: "year_round",
+    description: {
+      es: "Subproducto de trigo de alta calidad",
+      en: "High quality wheat by-product",
+      de: "Hochwertiges Weizen-Nebenprodukt"
+    }
+  },
+
+  {
+    id: "rice_husks_premium",
+    name: {
+      es: "Cascarilla de arroz premium",
+      en: "Rice husks premium",
+      de: "Reishülsen Premium"
+    },
+    category: "forrajes_secos",
+    composition: {
+      dryMatter: 87.0,
+      metabolizableEnergy: 6.5,
+      crudeProtein: 15.9,
+      crudeProteinDigestible: 13.1,
+      crudeFiber: 36.0,
+      calcium: 0.87,
+      phosphorus: 0.28,
+      ndf: 65.0,
+      adf: 28.8
+    },
+    costPerKg: 0.11,
+    availability: "seasonal",
+    description: {
+      es: "Cascarilla de arroz rica en proteína",
+      en: "Protein-rich rice husks",
+      de: "Proteinreiche Reishülsen"
+    }
   }
 ];
 
