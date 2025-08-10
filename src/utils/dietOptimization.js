@@ -22,14 +22,14 @@ export const optimizeDiet = (requirements, ingredients, constraints = {}, method
 
   // Configurar restricciones por categoría de ingrediente (más flexibles)
   const categoryLimits = {
-    forrajes_secos: dryMatterIntake * 0.70, // Máximo 70% forrajes secos
-    pastos_verdes: dryMatterIntake * 0.05, // Máximo 5% pastos verdes - sistema intensivo (solo fibra mínima)
-    ensilados: dryMatterIntake * 0.60, // Máximo 60% ensilados
-    alimentos_energeticos: dryMatterIntake * 0.80, // Máximo 80% concentrados - sistema intensivo
-    suplementos_proteicos: dryMatterIntake * 0.25, // Máximo 25% proteína (aumentado)
-    minerales: dryMatterIntake * 0.05, // Máximo 5% minerales
-    vitaminas: dryMatterIntake * 0.02, // Máximo 2% vitaminas
-    aditivos: dryMatterIntake * 0.03, // Máximo 3% aditivos
+    forrajes_secos: dryMatterIntake * 0.80, // Máximo 80% forrajes secos
+    pastos_verdes: dryMatterIntake * 0.10, // Máximo 10% pastos verdes - sistema intensivo
+    ensilados: dryMatterIntake * 0.70, // Máximo 70% ensilados
+    alimentos_energeticos: dryMatterIntake * 0.85, // Máximo 85% concentrados - sistema intensivo
+    suplementos_proteicos: dryMatterIntake * 0.35, // Máximo 35% proteína (aumentado)
+    minerales: dryMatterIntake * 0.15, // Máximo 15% minerales (aumentado significativamente)
+    vitaminas: dryMatterIntake * 0.08, // Máximo 8% vitaminas (aumentado)
+    aditivos: dryMatterIntake * 0.10, // Máximo 10% aditivos (aumentado)
     ...constraints.categoryLimits
   };
 
@@ -296,8 +296,8 @@ function sequentialOptimization(requirements, ingredients, categoryLimits) {
           remainingCalcium > 0 ? (remainingCalcium * 1000) / (bestMineral.composition.calcium || 1) : 0,
           remainingPhosphorus > 0 ? (remainingPhosphorus * 1000) / (bestMineral.composition.phosphorus || 1) : 0
         ),
-        remainingDM * 0.1, // Máximo 10% para minerales
-        2.0 // Máximo 2kg de suplemento mineral
+        remainingDM * 0.15, // Máximo 15% para minerales (aumentado)
+        3.0 // Máximo 3kg de suplemento mineral (aumentado)
       );
 
       if (mineralAmount > 0.01) {

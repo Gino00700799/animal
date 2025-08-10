@@ -1015,7 +1015,7 @@ export const faoIngredients = [
     },
     costPerKg: 0.15,
     availability: "year_round",
-    maxUsage: 0.5
+    maxUsage: 1.0 // Aumentado significativamente
   },
   {
     id: "oxido_magnesio",
@@ -1036,7 +1036,7 @@ export const faoIngredients = [
     },
     costPerKg: 0.45,
     availability: "year_round",
-    maxUsage: 0.3
+    maxUsage: 1.0 // Aumentado significativamente
   },
   {
     id: "sulfato_zinc",
@@ -1057,7 +1057,7 @@ export const faoIngredients = [
     },
     costPerKg: 2.50,
     availability: "year_round",
-    maxUsage: 0.01
+    maxUsage: 0.1 // Aumentado para mayor flexibilidad
   },
   {
     id: "sulfato_cobre",
@@ -1078,7 +1078,7 @@ export const faoIngredients = [
     },
     costPerKg: 3.20,
     availability: "year_round",
-    maxUsage: 0.005
+    maxUsage: 0.05 // Aumentado para mayor flexibilidad
   },
   {
     id: "selenito_sodio",
@@ -1099,7 +1099,7 @@ export const faoIngredients = [
     },
     costPerKg: 25.00,
     availability: "year_round",
-    maxUsage: 0.0001
+    maxUsage: 0.1 // Aumentado significativamente para mayor flexibilidad
   },
 
   // VITAMINAS
@@ -1122,7 +1122,7 @@ export const faoIngredients = [
     },
     costPerKg: 15.00,
     availability: "year_round",
-    maxUsage: 0.01
+    maxUsage: 0.5 // Aumentado significativamente
   },
   {
     id: "vitamina_d3",
@@ -1143,7 +1143,7 @@ export const faoIngredients = [
     },
     costPerKg: 18.00,
     availability: "year_round",
-    maxUsage: 0.01
+    maxUsage: 0.5 // Aumentado significativamente
   },
   {
     id: "vitamina_e",
@@ -1164,7 +1164,7 @@ export const faoIngredients = [
     },
     costPerKg: 22.00,
     availability: "year_round",
-    maxUsage: 0.02
+    maxUsage: 0.5 // Aumentado significativamente
   },
   {
     id: "complejo_b",
@@ -1187,7 +1187,7 @@ export const faoIngredients = [
     },
     costPerKg: 12.00,
     availability: "year_round",
-    maxUsage: 0.05
+    maxUsage: 0.5 // Aumentado significativamente
   },
 
   // ADITIVOS
@@ -1252,7 +1252,7 @@ export const faoIngredients = [
     },
     costPerKg: 12.50,
     availability: "year_round",
-    maxUsage: 0.05
+    maxUsage: 0.1
   },
   {
     id: "antioxidantes",
@@ -1273,7 +1273,7 @@ export const faoIngredients = [
     },
     costPerKg: 4.20,
     availability: "year_round",
-    maxUsage: 0.02
+    maxUsage: 0.1
   },
   {
     id: "acidificantes",
@@ -1828,7 +1828,7 @@ export const faoIngredients = [
     },
     costPerKg: 18.00,
     availability: "year_round",
-    maxUsage: 0.001
+    maxUsage: 0.1 // Aumentado significativamente para mayor flexibilidad
   },
   {
     id: "sulfato_hierro",
@@ -1849,7 +1849,7 @@ export const faoIngredients = [
     },
     costPerKg: 1.80,
     availability: "year_round",
-    maxUsage: 0.02
+    maxUsage: 0.5 // Aumentado significativamente
   },
 
   // ADITIVOS ADICIONALES

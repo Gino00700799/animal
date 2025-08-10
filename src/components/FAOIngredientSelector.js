@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Plus, Minus, Info, Microscope, AlertTriangle } from 'lucide-react';
+import { Check, Plus, Minus, Info, Microscope, AlertTriangle, Edit3, DollarSign, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { faoIngredientCategories as staticFaoIngredientCategories, getIngredientsByCategory as staticGetIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
 import { useData } from '../contexts/DataContext';
@@ -13,15 +13,63 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
   const [showDetails, setShowDetails] = useState({});
   const [selectedForDetailView, setSelectedForDetailView] = useState(null);
   const [showAdvancedDetails, setShowAdvancedDetails] = useState(false);
+  const [customPrices, setCustomPrices] = useState({}); // Precios personalizados
+  const [showPriceEditor, setShowPriceEditor] = useState(false);
 
   const toggleIngredient = (ingredient) => {
     const isSelected = selectedIngredients.some(ing => ing.id === ingredient.id);
     
+    // Aplicar precio personalizado si existe
+    const ingredientWithCustomPrice = {
+      ...ingredient,
+      costPerKg: customPrices[ingredient.id] || ingredient.costPerKg,
+      originalCost: ingredient.costPerKg
+    };
+    
     if (isSelected) {
       onIngredientsChange(selectedIngredients.filter(ing => ing.id !== ingredient.id));
     } else {
-      onIngredientsChange([...selectedIngredients, ingredient]);
+      onIngredientsChange([...selectedIngredients, ingredientWithCustomPrice]);
     }
+  };
+
+  const updateCustomPrice = (ingredientId, newPrice) => {
+    setCustomPrices(prev => ({
+      ...prev,
+      [ingredientId]: parseFloat(newPrice) || 0
+    }));
+    
+    // Actualizar ingredientes ya seleccionados
+    const updatedIngredients = selectedIngredients.map(ing => {
+      if (ing.id === ingredientId) {
+        return {
+          ...ing,
+          costPerKg: parseFloat(newPrice) || ing.originalCost || ing.costPerKg
+        };
+      }
+      return ing;
+    });
+    onIngredientsChange(updatedIngredients);
+  };
+
+  const resetPrice = (ingredientId) => {
+    setCustomPrices(prev => {
+      const newPrices = { ...prev };
+      delete newPrices[ingredientId];
+      return newPrices;
+    });
+    
+    // Restaurar precio original en ingredientes seleccionados
+    const updatedIngredients = selectedIngredients.map(ing => {
+      if (ing.id === ingredientId) {
+        return {
+          ...ing,
+          costPerKg: ing.originalCost || ing.costPerKg
+        };
+      }
+      return ing;
+    });
+    onIngredientsChange(updatedIngredients);
   };
 
   const toggleDetails = (ingredientId) => {
@@ -117,14 +165,14 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     const dryMatterIntake = animalData.dryMatterIntake || (animalData.weight * 0.025); // 2.5% del peso corporal
     
     const categoryLimits = {
-      'forrajes_secos': dryMatterIntake * 0.70,
-      'pastos_verdes': dryMatterIntake * 0.05, // Solo fibra mínima - sistema intensivo
-      'ensilados': dryMatterIntake * 0.60,
-      'alimentos_energeticos': dryMatterIntake * 0.60,
-      'suplementos_proteicos': dryMatterIntake * 0.25,
-      'minerales': dryMatterIntake * 0.05,
-      'vitaminas': dryMatterIntake * 0.02,
-      'aditivos': dryMatterIntake * 0.03
+      'forrajes_secos': dryMatterIntake * 0.80, // Aumentado
+      'pastos_verdes': dryMatterIntake * 0.10, // Aumentado para flexibilidad
+      'ensilados': dryMatterIntake * 0.70, // Aumentado
+      'alimentos_energeticos': dryMatterIntake * 0.85, // Aumentado para sistema intensivo
+      'suplementos_proteicos': dryMatterIntake * 0.35, // Aumentado
+      'minerales': dryMatterIntake * 0.15, // Aumentado significativamente
+      'vitaminas': dryMatterIntake * 0.08, // Aumentado
+      'aditivos': dryMatterIntake * 0.10 // Aumentado
     };
 
     // Calcular cuánto ya se ha usado de esta categoría
@@ -133,17 +181,21 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
       .reduce((sum, ing) => sum + (ing.amount || 0), 0);
 
     // Verificar si agregar este ingrediente excedería el límite de categoría
-    const categoryLimit = categoryLimits[ingredient.category] || dryMatterIntake * 0.3;
-    const minAmount = 0.1; // Cantidad mínima para agregar
+    const categoryLimit = categoryLimits[ingredient.category] || dryMatterIntake * 0.5; // Aumentado límite por defecto
+    const minAmount = ingredient.category === 'minerales' || ingredient.category === 'vitaminas' || ingredient.category === 'aditivos' 
+                      ? 0.01 : 0.1; // Cantidad mínima más pequeña para suplementos
     
     if (categoryUsed + minAmount > categoryLimit) {
       return false;
     }
 
-    // Verificar límites específicos para ciertos ingredientes
+    // Verificar límites específicos para ciertos ingredientes (más flexibles)
     if (ingredient.maxUsage) {
       const maxAllowed = dryMatterIntake * (ingredient.maxUsage / 100);
-      if (minAmount > maxAllowed) {
+      // Para minerales, vitaminas y aditivos, usar cantidad mínima muy pequeña
+      const checkAmount = ingredient.category === 'minerales' || ingredient.category === 'vitaminas' || ingredient.category === 'aditivos' 
+                         ? 0.0001 : minAmount; // Reducido para mayor flexibilidad
+      if (checkAmount > maxAllowed) {
         return false;
       }
     }
@@ -171,30 +223,35 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     
     const dryMatterIntake = animalData.dryMatterIntake || (animalData.weight * 0.025);
     const categoryLimits = {
-      'forrajes_secos': dryMatterIntake * 0.70,
-      'pastos_verdes': dryMatterIntake * 0.05, // Solo fibra mínima - sistema intensivo
-      'ensilados': dryMatterIntake * 0.60,
-      'alimentos_energeticos': dryMatterIntake * 0.60,
-      'suplementos_proteicos': dryMatterIntake * 0.25,
-      'minerales': dryMatterIntake * 0.05,
-      'vitaminas': dryMatterIntake * 0.02,
-      'aditivos': dryMatterIntake * 0.03
+      'forrajes_secos': dryMatterIntake * 0.80, // Aumentado
+      'pastos_verdes': dryMatterIntake * 0.10, // Aumentado para flexibilidad
+      'ensilados': dryMatterIntake * 0.70, // Aumentado
+      'alimentos_energeticos': dryMatterIntake * 0.85, // Aumentado para sistema intensivo
+      'suplementos_proteicos': dryMatterIntake * 0.35, // Aumentado
+      'minerales': dryMatterIntake * 0.15, // Aumentado significativamente
+      'vitaminas': dryMatterIntake * 0.08, // Aumentado
+      'aditivos': dryMatterIntake * 0.10 // Aumentado
     };
 
     const categoryUsed = selectedIngredients
       .filter(ing => ing.category === ingredient.category)
       .reduce((sum, ing) => sum + (ing.amount || 0), 0);
 
-    const categoryLimit = categoryLimits[ingredient.category] || dryMatterIntake * 0.3;
+    const categoryLimit = categoryLimits[ingredient.category] || dryMatterIntake * 0.5; // Aumentado límite por defecto
+    const minAmount = ingredient.category === 'minerales' || ingredient.category === 'vitaminas' || ingredient.category === 'aditivos' 
+                      ? 0.01 : 0.1; // Cantidad mínima más pequeña para suplementos
     
-    if (categoryUsed + 0.1 > categoryLimit) {
+    if (categoryUsed + minAmount > categoryLimit) {
       return `Límite de categoría excedido (${categoryUsed.toFixed(1)}/${categoryLimit.toFixed(1)} kg)`;
     }
 
     if (ingredient.maxUsage) {
       const maxAllowed = dryMatterIntake * (ingredient.maxUsage / 100);
-      if (0.1 > maxAllowed) {
-        return `Uso máximo: ${ingredient.maxUsage}% de la dieta`;
+      // Para minerales, vitaminas y aditivos, usar cantidad mínima muy pequeña
+      const checkAmount = ingredient.category === 'minerales' || ingredient.category === 'vitaminas' || ingredient.category === 'aditivos' 
+                         ? 0.0001 : 0.1; // Reducido para mayor flexibilidad
+      if (checkAmount > maxAllowed) {
+        return `Uso máximo: ${ingredient.maxUsage}% de la dieta (${maxAllowed.toFixed(3)} kg máximo)`;
       }
     }
 
@@ -230,17 +287,41 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
           <div className="text-sm font-medium text-gray-700">
             📊 Ingredientes: {categoryIngredients.length} disponibles en {(ingredientCategories[activeCategory]?.name?.[language] || ingredientCategories[activeCategory]?.name?.es || 'Categoría')}
           </div>
+          {Object.keys(customPrices).length > 0 && (
+            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              {Object.keys(customPrices).length} precios modificados
+            </span>
+          )}
         </div>
         
-        <button
-          onClick={() => setShowAdvancedDetails(!showAdvancedDetails)}
-          className={`flex items-center space-x-1 px-3 py-1 text-sm rounded-lg transition-colors ${
-            showAdvancedDetails ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
-          }`}
-        >
-          <Info className="w-3 h-3" />
-          <span>Details</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          {Object.keys(customPrices).length > 0 && (
+            <button
+              onClick={() => {
+                setCustomPrices({});
+                // Restaurar precios originales en ingredientes seleccionados
+                const updatedIngredients = selectedIngredients.map(ing => ({
+                  ...ing,
+                  costPerKg: ing.originalCost || ing.costPerKg
+                }));
+                onIngredientsChange(updatedIngredients);
+              }}
+              className="flex items-center space-x-1 px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Restaurar Todos</span>
+            </button>
+          )}
+          <button
+            onClick={() => setShowAdvancedDetails(!showAdvancedDetails)}
+            className={`flex items-center space-x-1 px-3 py-1 text-sm rounded-lg transition-colors ${
+              showAdvancedDetails ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            <Info className="w-3 h-3" />
+            <span>Details</span>
+          </button>
+        </div>
       </div>
 
 
@@ -464,7 +545,16 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
                       <div className={`flex items-center space-x-4 text-sm mt-1 ${canSelect ? 'text-gray-600' : 'text-gray-400'}`}>
                         <span>ME: {ingredient.composition.metabolizableEnergy} MJ/kg</span>
                         <span>PC: {ingredient.composition.crudeProtein}%</span>
-                        <span>€{ingredient.costPerKg}/kg</span>
+                        <div className="flex items-center space-x-2">
+                          <span className={customPrices[ingredient.id] ? 'line-through text-gray-400' : ''}>
+                            €{ingredient.costPerKg}/kg
+                          </span>
+                          {customPrices[ingredient.id] && (
+                            <span className="text-green-600 font-semibold">
+                              €{customPrices[ingredient.id]}/kg
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {!canSelect && disabledReason && (
                         <div className="text-xs text-red-500 mt-1 font-medium">
@@ -476,9 +566,16 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
                   
                   <div className="flex space-x-1">
                     <button
+                      onClick={() => setShowPriceEditor(showPriceEditor === ingredient.id ? null : ingredient.id)}
+                      className="p-2 text-green-400 hover:text-green-600 transition-colors"
+                      title="Editar precio"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => toggleDetails(ingredient.id)}
                       className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                      title="Grundinformationen"
+                      title="Información básica"
                     >
                       <Info className="w-4 h-4" />
                     </button>
@@ -486,13 +583,79 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
                       <button
                         onClick={() => setSelectedForDetailView(ingredient)}
                         className="p-2 text-blue-400 hover:text-blue-600 transition-colors"
-                        title="Detaillierte Nährstoffanalyse"
+                        title="Análisis nutricional detallado"
                       >
                         <Microscope className="w-4 h-4" />
                       </button>
                     )}
                   </div>
                 </div>
+
+                {/* Editor de Precio */}
+                {showPriceEditor === ingredient.id && (
+                  <div className="mt-4 pt-4 border-t border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h5 className="font-semibold text-green-800 flex items-center">
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        Editar Precio - {ingredient.name[language] || ingredient.name.es}
+                      </h5>
+                      {customPrices[ingredient.id] && (
+                        <button
+                          onClick={() => resetPrice(ingredient.id)}
+                          className="flex items-center space-x-1 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+                          title="Restaurar precio original"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          <span>Restaurar</span>
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Precio Original
+                        </label>
+                        <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600">
+                          €{ingredient.costPerKg}/kg
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nuevo Precio
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-300 rounded-l-md">
+                            €
+                          </span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={customPrices[ingredient.id] || ''}
+                            onChange={(e) => updateCustomPrice(ingredient.id, e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder={ingredient.costPerKg.toString()}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Eficiencia Energética
+                        </label>
+                        <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium">
+                          {((ingredient.composition.metabolizableEnergy) / (customPrices[ingredient.id] || ingredient.costPerKg)).toFixed(1)} MJ/€
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 text-xs text-gray-600">
+                      💡 <strong>Tip:</strong> Los precios se actualizan automáticamente en la optimización de costos
+                    </div>
+                  </div>
+                )}
 
                 {/* Detalles del Ingrediente */}
                 {showDetail && (
@@ -563,9 +726,40 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
               </span>
             ))}
           </div>
-          <p className="text-blue-700 text-sm mt-2">
-            Costo promedio: €{(selectedIngredients.reduce((sum, ing) => sum + ing.costPerKg, 0) / selectedIngredients.length).toFixed(2)}/kg
-          </p>
+          <div className="mt-2 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-blue-700">
+                Costo promedio: €{(selectedIngredients.reduce((sum, ing) => sum + ing.costPerKg, 0) / selectedIngredients.length).toFixed(2)}/kg
+              </span>
+              {Object.keys(customPrices).length > 0 && (
+                <span className="text-green-600 font-medium">
+                  💰 Precios personalizados activos
+                </span>
+              )}
+            </div>
+            {Object.keys(customPrices).length > 0 && (
+              <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs">
+                <strong>Cambios de precios:</strong>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-1">
+                  {Object.entries(customPrices).map(([ingredientId, price]) => {
+                    const ingredient = categoryIngredients.find(ing => ing.id === ingredientId) || 
+                                     selectedIngredients.find(ing => ing.id === ingredientId);
+                    if (!ingredient) return null;
+                    const originalPrice = ingredient.originalCost || ingredient.costPerKg;
+                    const change = ((price - originalPrice) / originalPrice * 100);
+                    return (
+                      <div key={ingredientId} className="flex justify-between">
+                        <span>{ingredient.name.es}:</span>
+                        <span className={change >= 0 ? 'text-red-600' : 'text-green-600'}>
+                          €{originalPrice} → €{price} ({change >= 0 ? '+' : ''}{change.toFixed(1)}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
