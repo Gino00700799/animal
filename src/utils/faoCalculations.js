@@ -29,6 +29,17 @@ export const convertNetToMetabolizable = (netEnergy, efficiency = 0.67) => {
  * @param {number} activityFactor - Factor de actividad (default 0.1 para confinamiento)
  * @returns {number} Energía para actividad en MJ ME/día
  */
+export const getActivityFactor = (category, isGrazing = false) => {
+  // Mapeo por categorías FAO
+  const grazing = Boolean(isGrazing);
+  if (category === 'becerro_destetado') return 0.1; // Kälber
+  if (category === 'toro_adulto') return grazing ? 0.25 : 0.1; // Stiere
+  // Mastbullen: torete, novillo, novillo_final
+  if (category === 'torete' || category === 'novillo' || category === 'novillo_final') return 0.1;
+  // Default konservativ
+  return 0.1;
+};
+
 export const calculateActivityEnergy = (weight, activityFactor = 0.1) => {
   const maintenanceNE = calculateMaintenanceNetEnergy(weight);
   const maintenanceME = convertNetToMetabolizable(maintenanceNE);
@@ -41,8 +52,15 @@ export const calculateActivityEnergy = (weight, activityFactor = 0.1) => {
  * @param {number} dailyGain - Ganancia diaria deseada en kg
  * @returns {number} Energía para crecimiento en MJ ME/día
  */
-export const calculateGrowthEnergy = (dailyGain) => {
-  return 16 * dailyGain;
+export const getGrowthEnergyFactor = (weight) => {
+  if (weight < 250) return 19;
+  if (weight < 500) return 16;
+  return 14; // >= 500 kg
+};
+
+export const calculateGrowthEnergy = (dailyGain, weight) => {
+  const factor = getGrowthEnergyFactor(weight);
+  return factor * dailyGain;
 };
 
 /**
@@ -56,7 +74,7 @@ export const calculateTotalEnergyRequirement = (weight, dailyGain, activityFacto
   const maintenanceNE = calculateMaintenanceNetEnergy(weight);
   const maintenanceME = convertNetToMetabolizable(maintenanceNE);
   const activityME = calculateActivityEnergy(weight, activityFactor);
-  const growthME = calculateGrowthEnergy(dailyGain);
+  const growthME = calculateGrowthEnergy(dailyGain, weight);
   
   const totalME = maintenanceME + activityME + growthME;
   
@@ -139,12 +157,13 @@ export const interpolateNutrientRequirements = (weight, dailyGain) => {
   
   return {
     crudeProteinPercent: parseFloat((closest.cp * gainRatio).toFixed(1)),
-    calciumPercent: parseFloat((closest.ca * weightRatio).toFixed(3)),
-    phosphorusPercent: parseFloat((closest.p * weightRatio).toFixed(3)),
+    // Ca und P Prozentwerte NICHT mit weightRatio skalieren, da bereits gewichtsspezifisch
+    calciumPercent: parseFloat((closest.ca).toFixed(3)),
+    phosphorusPercent: parseFloat((closest.p).toFixed(3)),
     dryMatterIntake: parseFloat(dmIntake.toFixed(1)),
     crudeProteinRequired: parseFloat((dmIntake * closest.cp * gainRatio / 100).toFixed(2)),
-    calciumRequired: parseFloat((dmIntake * closest.ca * weightRatio / 100 * 1000).toFixed(1)), // gramos
-    phosphorusRequired: parseFloat((dmIntake * closest.p * weightRatio / 100 * 1000).toFixed(1)) // gramos
+    calciumRequired: parseFloat((dmIntake * closest.ca / 100 * 1000).toFixed(1)), // gramos
+    phosphorusRequired: parseFloat((dmIntake * closest.p / 100 * 1000).toFixed(1)) // gramos
   };
 };
 
@@ -154,9 +173,14 @@ export const interpolateNutrientRequirements = (weight, dailyGain) => {
  * @returns {object} Requerimientos completos
  */
 export const calculateCompleteNutrientRequirements = (animalData) => {
-  const { weight, dailyGain, category, activityFactor = 0.1 } = animalData;
+  const { weight, dailyGain, category, activityFactor, isGrazing } = animalData;
   
-  const energyReq = calculateTotalEnergyRequirement(weight, dailyGain, activityFactor);
+  // Aktivitätsfaktor automatisch aus Kategorie/Weidegang bestimmen, falls nicht gesetzt
+  const resolvedActivityFactor = (typeof activityFactor === 'number')
+    ? activityFactor
+    : getActivityFactor(category, isGrazing);
+
+  const energyReq = calculateTotalEnergyRequirement(weight, dailyGain, resolvedActivityFactor);
   const nutrientReq = interpolateNutrientRequirements(weight, dailyGain);
   
   return {
