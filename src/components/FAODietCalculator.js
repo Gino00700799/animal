@@ -116,10 +116,14 @@ const FAODietCalculator = () => {
               <div className="text-3xl">🐂</div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">
-                  Calculadora FAO de Dietas para Ganado Vacuno
+                  {language === 'en' ? 'FAO Cattle Diet Calculator' :
+                   language === 'de' ? 'FAO Rinder-Futterrechner' :
+                   'Calculadora FAO de Dietas para Ganado Vacuno'}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Formulación científica basada en estándares FAO y NASEM
+                  {language === 'en' ? 'Scientific formulation based on FAO and NASEM standards' :
+                   language === 'de' ? 'Wissenschaftliche Formulierung basierend auf FAO- und NASEM-Standards' :
+                   'Formulación científica basada en estándares FAO y NASEM'}
                 </p>
               </div>
             </div>
@@ -128,7 +132,11 @@ const FAODietCalculator = () => {
               className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
-              <span>Reiniciar</span>
+              <span>
+                {language === 'en' ? 'Reset' :
+                 language === 'de' ? 'Zurücksetzen' :
+                 'Reiniciar'}
+              </span>
             </button>
           </div>
         </div>
@@ -206,9 +214,15 @@ const FAODietCalculator = () => {
                 <div className="flex items-center space-x-3">
                   <Calculator className="w-6 h-6 text-blue-500" />
                   <div>
-                    <h3 className="font-semibold text-gray-800">Método de Optimización</h3>
+                    <h3 className="font-semibold text-gray-800">
+                      {language === 'en' ? 'Optimization Method' :
+                       language === 'de' ? 'Optimierungsmethode' :
+                       'Método de Optimización'}
+                    </h3>
                     <p className="text-sm text-gray-600">
-                      Selecciona el método de formulación de la dieta
+                      {language === 'en' ? 'Select the diet formulation method' :
+                       language === 'de' ? 'Wählen Sie die Rationsformulierungsmethode' :
+                       'Selecciona el método de formulación de la dieta'}
                     </p>
                   </div>
                 </div>
@@ -220,7 +234,9 @@ const FAODietCalculator = () => {
                       optimizationMethod === 'linear' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
                     }`}
                   >
-                    📊 Programación Lineal
+                    📊 {language === 'en' ? 'Linear Programming' :
+                         language === 'de' ? 'Lineare Programmierung' :
+                         'Programación Lineal'}
                   </button>
                   <button
                     onClick={() => setOptimizationMethod('pearson')}
@@ -228,7 +244,9 @@ const FAODietCalculator = () => {
                       optimizationMethod === 'pearson' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600'
                     }`}
                   >
-                    ⚖️ Cuadrado de Pearson
+                    ⚖️ {language === 'en' ? 'Pearson Square' :
+                         language === 'de' ? 'Pearson-Quadrat' :
+                         'Cuadrado de Pearson'}
                   </button>
                 </div>
               </div>
@@ -272,7 +290,10 @@ const FAODietCalculator = () => {
                       <span className={`text-sm font-medium ${
                         validation.isValid ? 'text-green-600' : 'text-yellow-600'
                       }`}>
-                        {validation.isValid ? 'Dieta válida' : 'Revisar dieta'}
+                        {validation.isValid ? 
+                          (language === 'en' ? 'Valid diet' : language === 'de' ? 'Gültige Diät' : 'Dieta válida') :
+                          (language === 'en' ? 'Review diet' : language === 'de' ? 'Diät überprüfen' : 'Revisar dieta')
+                        }
                       </span>
                     </div>
                   )}
@@ -282,7 +303,9 @@ const FAODietCalculator = () => {
                       onClick={() => setCurrentStep(4)}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      Ver Resultados
+                      {language === 'en' ? 'View Results' :
+                       language === 'de' ? 'Ergebnisse anzeigen' :
+                       'Ver Resultados'}
                     </button>
                   )}
                 </div>
@@ -293,9 +316,11 @@ const FAODietCalculator = () => {
                 <div className="text-sm text-gray-700">
                   {optimizationMethod === 'linear' ? (
                     <div>
-                      <strong>📊 Programación Lineal:</strong> Optimiza múltiples ingredientes simultáneamente, 
-                      considerando restricciones por categorías y minimizando costos. Ideal para dietas complejas 
-                      con muchos ingredientes.
+                      <strong>📊 {language === 'en' ? 'Linear Programming:' : language === 'de' ? 'Lineare Programmierung:' : 'Programación Lineal:'}</strong> {
+                        language === 'en' ? 'Optimizes multiple ingredients simultaneously, considering category constraints and minimizing costs. Ideal for complex diets with many ingredients.' :
+                        language === 'de' ? 'Optimiert mehrere Futtermittel gleichzeitig unter Berücksichtigung von Kategoriebeschränkungen und Kostenminimierung. Ideal für komplexe Rationen mit vielen Futtermitteln.' :
+                        'Optimiza múltiples ingredientes simultáneamente, considerando restricciones por categorías y minimizando costos. Ideal para dietas complejas con muchos ingredientes.'
+                      }
                     </div>
                   ) : (
                     <div>

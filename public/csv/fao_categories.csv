@@ -1,0 +1,4 @@
+id,name_de,name_en,name_es,desc_de,desc_en,desc_es,emoji,weight_min,weight_max,age_min,age_max,dg_min,dg_max,def_weight,def_age,def_dg
+faoc_03,Kalb (Aufzucht),Calf (rearing),Ternero (cría),Jungtier in Aufzucht.,Young calf rearing.,Cría de ternero.,🐮,40,220,1,18,0.3,1.2,120,8,0.8
+faoc_04,Mastbulle,Beef steer/bull (fattening),Novillo/torito (engorde),Mastphase.,Fattening phase.,Fase de engorde.,🐂,250,750,10,36,0.6,1.6,450,18,1.2
+faoc_bull_adult,Stier (Erhaltung/Zucht),Adult Bull (maintenance),Toro adulto (mantenimiento),Erhaltungs-/Zuchtbulle.,Intact male for breeding or maintenance.,Macho entero para reproducción o mantenimiento.,🐂,650,1200,24,120,0.0,0.3,800,36,0.0

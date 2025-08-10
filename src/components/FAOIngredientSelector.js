@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Check, Plus, Minus, Info, Microscope, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { faoIngredientCategories, getIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
+import { faoIngredientCategories as staticFaoIngredientCategories, getIngredientsByCategory as staticGetIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
+import { useData } from '../contexts/DataContext';
 import { evaluateFormulationComplexity } from '../utils/ingredientComplexityManager';
 import DetailedNutritionView from './DetailedNutritionView';
 
 const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, animalData }) => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('forrajes_secos');
+  const { ingredientCategories, ingredients, loading, error } = useData();
   const [showDetails, setShowDetails] = useState({});
   const [selectedForDetailView, setSelectedForDetailView] = useState(null);
   const [showAdvancedDetails, setShowAdvancedDetails] = useState(false);
@@ -29,8 +31,16 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
     }));
   };
 
-  // Todos los ingredientes de la categoría (FAO estándar + nuevos)
-  const categoryIngredients = getIngredientsByCategory(activeCategory);
+  // Ingredientes por categoría (nur CSV, keine statischen Fallbacks)
+  const categoryIngredients = (ingredients || []).filter(i => i.category === activeCategory);
+
+  // Wenn Kategorien verfügbar sind, initiale Kategorie setzen
+  React.useEffect(() => {
+    const ids = ingredientCategories ? Object.keys(ingredientCategories) : [];
+    if (ids.length > 0 && !ids.includes(activeCategory)) {
+      setActiveCategory(ids[0]);
+    }
+  }, [ingredientCategories]);
 
   // Función para calcular el estado nutricional actual
   const calculateCurrentNutrition = () => {
@@ -218,7 +228,7 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-sm font-medium text-gray-700">
-            📊 Ingredientes FAO: {categoryIngredients.length} disponibles en {faoIngredientCategories[activeCategory]?.name[language] || faoIngredientCategories[activeCategory]?.name.es}
+            📊 Ingredientes: {categoryIngredients.length} disponibles en {(ingredientCategories[activeCategory]?.name?.[language] || ingredientCategories[activeCategory]?.name?.es || 'Categoría')}
           </div>
         </div>
         
@@ -235,8 +245,14 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
 
 
       {/* Categorías de Ingredientes */}
+      {loading && (
+        <div className="text-sm text-gray-500 mb-2">Daten werden geladen...</div>
+      )}
+      {error && (
+        <div className="text-sm text-red-600 mb-2">Fehler beim Laden der CSV-Daten</div>
+      )}
       <div className="flex flex-wrap gap-2 mb-6">
-        {Object.entries(faoIngredientCategories).map(([categoryId, category]) => (
+        {Object.entries(ingredientCategories || {}).map(([categoryId, category]) => (
           <button
             key={categoryId}
             onClick={() => setActiveCategory(categoryId)}

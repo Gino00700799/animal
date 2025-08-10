@@ -7,6 +7,7 @@ import ResultsDisplay from './components/ResultsDisplay';
 import LanguageSelector from './components/LanguageSelector';
 import FAODietCalculator from './components/FAODietCalculator';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { DataProvider } from './contexts/DataContext';
 
 const AppContent = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -124,7 +125,9 @@ const AppContent = () => {
 function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <DataProvider>
+        <AppContent />
+      </DataProvider>
     </LanguageProvider>
   );
 }

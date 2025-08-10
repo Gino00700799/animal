@@ -1,10 +1,11 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getAllCategories } from '../data/faoCategories';
+import { useData } from '../contexts/DataContext';
 
 const FAOCategorySelector = ({ selectedCategory, onCategorySelect }) => {
   const { t, language } = useLanguage();
-  const categories = getAllCategories();
+  const { categories: csvCategories, loading, error } = useData();
+  const categories = csvCategories || [];
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
@@ -20,6 +21,12 @@ const FAOCategorySelector = ({ selectedCategory, onCategorySelect }) => {
         </div>
       </div>
 
+      {loading && (
+        <div className="text-sm text-gray-500 mb-2">Daten werden geladen...</div>
+      )}
+      {error && (
+        <div className="text-sm text-red-600 mb-2">Fehler beim Laden der CSV-Daten</div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
           <div

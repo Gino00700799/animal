@@ -1,0 +1,186 @@
+id,category_id,name_de,name_en,name_es,dry_matter,me_mj_per_kg,cp_pct,fiber_pct,calcium_pct,phosphorus_pct,cost_per_kg,availability,max_usage_pct
+ing_00001,cat_01,'Archer' axillaris,'Archer' axillaris,'Archer' axillaris,92.24,8.82,14.25,51.82,6.071,1.33,,,80
+ing_00002,cat_02,Acacia aneura,Acacia aneura,Acacia aneura,90.58,,9.13,57.72,,,,,30
+ing_00003,cat_02,Acacia bussei,Acacia bussei,Acacia bussei,92.39,,15.56,,17.4,1.6,,,30
+ing_00004,cat_02,Acacia coriacea,Acacia coriacea,Acacia coriacea,92.13,,12.56,57.27,,,,,30
+ing_00005,cat_02,Acacia decurrens,Acacia decurrens,Acacia decurrens,92.37,,,38.15,,,,,30
+ing_00006,cat_02,Acacia dolichocephala,Acacia dolichocephala,Acacia dolichocephala,92.63,,13.88,52.5,,,,,30
+ing_00007,cat_02,Acacia hereroensis,Acacia hereroensis,Acacia hereroensis,94.64,,14.09,44.94,,,,,30
+ing_00008,cat_02,Acacia karroo,Acacia karroo,Acacia karroo,92.85,,15.59,42.17,,,,,30
+ing_00009,cat_02,Acacia mangium,Acacia mangium,Acacia mangium,90.86,,13.63,56.91,,,,,30
+ing_00010,cat_02,Acacia melanoxylon,Acacia melanoxylon,Acacia melanoxylon,92.17,,14.44,59.51,,,,,30
+ing_00011,cat_02,Acacia microbotrya,Acacia microbotrya,Acacia microbotrya,93.99,,15.31,41.24,,,,,30
+ing_00012,cat_02,Acacia persiciflora,Acacia persiciflora,Acacia persiciflora,90.38,,17.69,52.51,,,,,30
+ing_00013,cat_02,Acacia reficiens,Acacia reficiens,Acacia reficiens,90.67,,18.0,,18.0,1.0,,,30
+ing_00014,cat_02,Acacia salicina,Acacia salicina,Acacia salicina,89.79,,14.31,46.32,,,,,30
+ing_00015,cat_02,Acacia saligna,Acacia saligna,Acacia saligna,90.97,,14.98,44.44,37.3,1.275,,,30
+ing_00016,cat_02,Acaciella angustissima,Acaciella angustissima,Acaciella angustissima,89.49,,25.61,37.56,15.5,2.2,,,30
+ing_00017,cat_02,African copaiba balsam tree,African copaiba balsam tree,African copaiba balsam tree,87.7,,20.06,59.41,3.15,3.7,,,30
+ing_00018,cat_02,African locust bean,African locust bean,African locust bean,89.69,10.48,,69.97,,,,,30
+ing_00019,cat_02,Albizia gummifera,Albizia gummifera,Albizia gummifera,89.97,,23.69,66.13,,1.682,,,30
+ing_00020,cat_02,Albizia lebbeck,Albizia lebbeck,Albizia lebbeck,94.89,,24.84,57.53,20.156,1.645,,,30
+ing_00021,cat_02,Albizia schimperiana,Albizia schimperiana,Albizia schimperiana,90.93,,24.06,44.34,13.567,1.9,,,30
+ing_00022,cat_01,Alfalfa,Alfalfa,Alfalfa,91.18,9.28,19.05,42.73,16.116,2.316,,,80
+ing_00023,cat_01,Alfalfa hay,Alfalfa hay,Alfalfa hay,88.06,,19.06,51.71,,,,,80
+ing_00024,cat_01,Alfalfa silage,Alfalfa silage,Alfalfa silage,90.62,8.84,16.25,49.26,,5.1,,,80
+ing_00025,cat_01,Alyce clover,Alyce clover,Alyce clover,89.64,9.36,16.58,48.59,7.9,1.471,,,80
+ing_00026,cat_01,Andropogon abyssinicus,Andropogon abyssinicus,Andropogon abyssinicus,91.61,,4.94,79.02,3.5,3.0,,,80
+ing_00027,cat_01,Andropogon chinensis,Andropogon chinensis,Andropogon chinensis,91.36,,6.19,82.67,,0.7,,,80
+ing_00028,cat_01,Aristida barbicollis,Aristida barbicollis,Aristida barbicollis,92.8,,8.69,70.84,,2.2,,,80
+ing_00029,cat_01,Aristida congesta,Aristida congesta,Aristida congesta,90.32,,10.0,67.44,,1.6,,,80
+ing_00030,cat_01,Aristida kenyensis,Aristida kenyensis,Aristida kenyensis,93.59,,5.19,74.37,,,,,80
+ing_00031,cat_04,Arrowroot,Arrowroot,Arrowroot,93.48,7.21,9.33,42.47,,,,,30
+ing_00032,cat_02,Aspilia africana,Aspilia africana,Aspilia africana,92.45,7.66,6.06,45.84,9.8,0.9,,,30
+ing_00033,cat_02,Aspilia mossambicensis,Aspilia mossambicensis,Aspilia mossambicensis,89.22,,24.48,32.37,,,,,30
+ing_00034,cat_02,Balanites aegyptiaca,Balanites aegyptiaca,Balanites aegyptiaca,92.83,9.41,18.28,37.52,7.9,2.633,,,30
+ing_00035,cat_02,Balanites maughamii,Balanites maughamii,Balanites maughamii,89.86,,,,,,,,30
+ing_00036,cat_04,Banana,Banana,Banana,93.23,7.77,7.45,44.62,,,,,30
+ing_00037,cat_04,Banana fruit,Banana fruit,Banana fruit,93.73,6.87,10.5,53.69,,,,,30
+ing_00038,cat_04,Banana leaf,Banana leaf,Banana leaf,94.08,7.22,10.62,44.72,,,,,30
+ing_00039,cat_04,Banana leaves,Banana leaves,Banana leaves,92.87,7.15,11.76,59.36,11.68,1.67,,,30
+ing_00040,cat_04,Banana peel,Banana peel,Banana peel,93.67,10.13,5.25,40.93,,5.4,,,30
+ing_00041,cat_04,Banana pseudostem,Banana pseudostem,Banana pseudostem,92.27,7.38,5.8,42.15,,,,,30
+ing_00042,cat_04,Banana stem,Banana stem,Banana stem,93.36,8.49,8.0,50.36,,,,,30
+ing_00043,cat_04,Banana stem + leaves,Banana stem + leaves,Banana stem + leaves,91.31,7.48,13.83,56.01,,,,,30
+ing_00044,cat_02,Barleria acanthoides,Barleria acanthoides,Barleria acanthoides,89.49,8.28,14.85,,,,,,30
+ing_00045,cat_03,Barley straw,Barley straw,Barley straw,91.33,8.28,2.52,72.12,4.427,1.288,,,40
+ing_00046,cat_01,Barrel medic,Barrel medic,Barrel medic,88.72,9.68,18.48,42.29,,,,,80
+ing_00047,cat_02,Barteria fistulosa,Barteria fistulosa,Barteria fistulosa,88.87,8.75,,41.37,,,,,30
+ing_00048,cat_02,Barwood,Barwood,Barwood,88.53,8.81,19.75,51.14,6.82,2.391,,,30
+ing_00049,cat_01,Bermuda grass hay,Bermuda grass hay,Bermuda grass hay,90.76,,7.27,71.04,,,,,80
+ing_00050,cat_02,Bombax buonopozense,Bombax buonopozense,Bombax buonopozense,87.88,11.0,18.34,24.96,3.65,4.3,,,30
+ing_00051,cat_02,Boscia albitrunca,Boscia albitrunca,Boscia albitrunca,93.45,,20.31,49.81,,,,,30
+ing_00052,cat_02,Boscia angustifolia,Boscia angustifolia,Boscia angustifolia,92.05,,20.62,,22.4,2.4,,,30
+ing_00053,cat_01,Brachiaria jubata,Brachiaria jubata,Brachiaria jubata,87.91,,8.1,54.42,11.4,1.25,,,80
+ing_00054,cat_01,Brachiaria stigmatisata,Brachiaria stigmatisata,Brachiaria stigmatisata,89.77,,8.82,68.07,3.85,0.95,,,80
+ing_00055,cat_02,Bridelia ferruginea,Bridelia ferruginea,Bridelia ferruginea,88.22,,13.6,48.09,5.65,2.2,,,30
+ing_00056,cat_02,Bridelia micrantha,Bridelia micrantha,Bridelia micrantha,90.14,,20.38,49.75,,,,,30
+ing_00057,cat_01,Bristly foxtail,Bristly foxtail,Bristly foxtail,93.31,8.7,9.78,59.93,3.9,2.371,,,80
+ing_00058,cat_01,Buffel grass,Buffel grass,Buffel grass,92.61,8.63,8.76,67.4,2.371,2.763,,,80
+ing_00059,cat_01,Butterfly pea,Butterfly pea,Butterfly pea,91.06,7.99,14.77,63.01,4.4,3.343,,,80
+ing_00060,cat_02,Cadaba farinosa,Cadaba farinosa,Cadaba farinosa,91.06,,26.06,,14.8,1.8,,,30
+ing_00061,cat_02,Calliandra calothyrsus,Calliandra calothyrsus,Calliandra calothyrsus,89.84,8.86,21.98,47.1,11.167,1.611,,,30
+ing_00062,cat_01,Calopo,Calopo,Calopo,89.81,8.2,17.31,55.42,13.6,2.9,,,80
+ing_00063,cat_02,Calpurnia aurea,Calpurnia aurea,Calpurnia aurea,90.64,,12.06,45.61,,,,,30
+ing_00064,cat_02,Camwood,Camwood,Camwood,90.55,,,62.65,,,,,30
+ing_00065,cat_01,Canary grass,Canary grass,Canary grass,91.99,,14.9,48.94,,,,,80
+ing_00066,cat_02,Canthium schimperianum,Canthium schimperianum,Canthium schimperianum,94.79,,8.5,,8.9,0.5,,,30
+ing_00067,cat_02,Carissa bispinosa,Carissa bispinosa,Carissa bispinosa,92.31,,9.68,48.51,14.45,1.7,,,30
+ing_00068,cat_04,Carrot leaf,Carrot leaf,Carrot leaf,88.23,,10.35,21.7,8.56,3.24,,,30
+ing_00069,cat_04,Cassava,Cassava,Cassava,90.17,10.0,7.82,34.65,3.4,1.3,,,30
+ing_00070,cat_04,Cassava chips,Cassava chips,Cassava chips,86.33,,2.5,,,,,,30
+ing_00071,cat_04,Cassava leaf + stem,Cassava leaf + stem,Cassava leaf + stem,93.2,7.54,,22.91,,,,,30
+ing_00072,cat_04,Cassava leaves,Cassava leaves,Cassava leaves,91.91,8.5,24.21,38.38,15.644,2.222,,,30
+ing_00073,cat_04,Cassava peelings,Cassava peelings,Cassava peelings,91.05,9.96,4.68,39.86,16.05,0.92,,,30
+ing_00074,cat_04,Cassava tuber,Cassava tuber,Cassava tuber,91.84,9.11,6.68,43.62,13.643,0.89,,,30
+ing_00075,cat_01,Cenchrus biflorus,Cenchrus biflorus,Cenchrus biflorus,92.09,,20.13,14.81,,2.933,,,80
+ing_00076,cat_01,Centro,Centro,Centro,90.44,,18.63,68.24,14.0,3.3,,,80
+ing_00077,cat_01,Centrosema acutifolium,Centrosema acutifolium,Centrosema acutifolium,93.88,,16.67,,,1.686,,,80
+ing_00078,cat_01,Centrosema brasilianum,Centrosema brasilianum,Centrosema brasilianum,93.24,,9.23,,,0.87,,,80
+ing_00079,cat_01,Centrosema pascuorum,Centrosema pascuorum,Centrosema pascuorum,93.33,7.76,5.53,67.84,6.13,0.393,,,80
+ing_00080,cat_01,Chamaecrista rotundifolia,Chamaecrista rotundifolia,Chamaecrista rotundifolia,90.98,,32.75,27.91,,,,,80
+ing_00081,cat_03,Chickpea straw,Chickpea straw,Chickpea straw,91.97,7.99,6.42,52.64,14.1,0.567,,,40
+ing_00082,cat_01,Chrysopogon aucheri,Chrysopogon aucheri,Chrysopogon aucheri,92.87,8.23,5.47,73.26,2.062,1.506,,,80
+ing_00083,cat_01,Chrysopogon plumulosus,Chrysopogon plumulosus,Chrysopogon plumulosus,92.85,,4.88,,1.9,1.7,,,80
+ing_00084,cat_01,Clover (T. bilineatum),Clover (T. bilineatum),Clover (T. bilineatum),91.66,,17.19,,8.85,3.25,,,80
+ing_00085,cat_01,Clover (T. decorum),Clover (T. decorum),Clover (T. decorum),93.66,11.13,19.21,38.38,7.5,2.767,,,80
+ing_00086,cat_01,Clover (T. fragiferum),Clover (T. fragiferum),Clover (T. fragiferum),91.66,8.34,13.83,39.48,,,,,80
+ing_00087,cat_01,Clover (T. quartinianum),Clover (T. quartinianum),Clover (T. quartinianum),91.62,9.96,18.22,38.11,12.1,1.335,,,80
+ing_00088,cat_01,Clover (T. rueppellianum),Clover (T. rueppellianum),Clover (T. rueppellianum),91.44,11.15,19.71,42.43,7.2,3.0,,,80
+ing_00089,cat_01,Clover (T. steudneri),Clover (T. steudneri),Clover (T. steudneri),92.94,,16.43,,12.2,2.388,,,80
+ing_00090,cat_01,Clover (T. tembense),Clover (T. tembense),Clover (T. tembense),90.24,,22.26,36.67,,0.9,,,80
+ing_00091,cat_03,Common bean straw,Common bean straw,Common bean straw,92.21,8.25,7.2,60.51,8.9,1.4,,,40
+ing_00092,cat_03,Cowpea hay,Cowpea hay,Cowpea hay,91.2,10.67,16.37,45.44,10.983,3.315,,,40
+ing_00093,cat_02,Cytisus pulvinatus,Cytisus pulvinatus,Cytisus pulvinatus,91.91,9.71,16.73,55.77,4.513,1.956,,,30
+ing_00094,cat_02,Egyptian carissa,Egyptian carissa,Egyptian carissa,91.78,,8.63,42.93,,,,,30
+ing_00095,cat_04,Enset,Enset,Enset,91.44,5.98,11.21,64.44,8.491,2.053,,,30
+ing_00096,cat_04,Enset corm,Enset corm,Enset corm,93.09,,2.58,51.49,2.163,2.433,,,30
+ing_00097,cat_04,Enset leaf,Enset leaf,Enset leaf,92.53,7.74,15.3,52.52,10.05,3.183,,,30
+ing_00098,cat_04,Enset midrib,Enset midrib,Enset midrib,92.11,,4.77,65.42,,,,,30
+ing_00099,cat_04,Enset pseudostem,Enset pseudostem,Enset pseudostem,91.15,7.88,4.18,37.05,,,,,30
+ing_00100,cat_04,Enset roots,Enset roots,Enset roots,91.19,8.63,4.31,36.78,,,,,30
+ing_00101,cat_04,Enset stem,Enset stem,Enset stem,93.36,7.64,4.31,48.23,4.2,4.1,,,30
+ing_00102,cat_05,Fish Meal,Fish Meal,Fish Meal,94.05,7.58,,25.0,,,,,2
+ing_00103,cat_05,Fish Meal  Tanzania,Fish Meal  Tanzania,Fish Meal  Tanzania,93.24,7.72,,14.48,,,,,2
+ing_00104,cat_05,Fish Meal  _ Nkejje,Fish Meal  _ Nkejje,Fish Meal  _ Nkejje,91.9,7.24,,26.75,,,,,2
+ing_00105,cat_05,Fish Meal ( L. Victoria ),Fish Meal ( L. Victoria ),Fish Meal ( L. Victoria ),91.61,7.54,,19.76,,,,,2
+ing_00106,cat_05,Fish Meal (Victoria),Fish Meal (Victoria),Fish Meal (Victoria),93.33,8.01,,13.41,,,,,2
+ing_00107,cat_05,Fish Meal Crushed,Fish Meal Crushed,Fish Meal Crushed,92.32,7.96,,22.75,,,,,2
+ing_00108,cat_05,Fish Meal Dry,Fish Meal Dry,Fish Meal Dry,95.26,7.31,,15.77,,,,,2
+ing_00109,cat_05,Fish Meal Mukene,Fish Meal Mukene,Fish Meal Mukene,92.33,7.85,,24.41,,,,,2
+ing_00110,cat_05,Fish Mukene,Fish Mukene,Fish Mukene,91.54,8.09,,26.54,,,,,2
+ing_00111,cat_05,Fish Nkejje,Fish Nkejje,Fish Nkejje,91.34,8.54,,13.21,,,,,2
+ing_00112,cat_05,Fish Nkejje  Lake Albert Type,Fish Nkejje  Lake Albert Type,Fish Nkejje  Lake Albert Type,91.65,7.94,,7.42,,,,,2
+ing_00113,cat_05,Fish Nkejje Tanzania,Fish Nkejje Tanzania,Fish Nkejje Tanzania,90.74,8.98,,14.4,,,,,2
+ing_00114,cat_04,Ipomoea eriocarpa vines,Ipomoea eriocarpa vines,Ipomoea eriocarpa vines,91.16,,15.62,46.06,,3.5,,,30
+ing_00115,cat_04,Ipomoea heterotricha vines,Ipomoea heterotricha vines,Ipomoea heterotricha vines,90.61,,9.88,51.59,,0.8,,,30
+ing_00116,cat_05,Limestone,Limestone,Limestone,95.85,,0.44,64.89,97.15,0.225,,,2
+ing_00117,cat_05,Manure (cattle),Manure (cattle),Manure (cattle),90.08,,13.47,,,9.55,,,2
+ing_00118,cat_05,Manure (donkey),Manure (donkey),Manure (donkey),97.38,,,,,4.42,,,2
+ing_00119,cat_05,Manure (equines),Manure (equines),Manure (equines),89.34,,15.44,,,12.75,,,2
+ing_00120,cat_05,Manure (shoats),Manure (shoats),Manure (shoats),89.19,,16.78,,,11.35,,,2
+ing_00121,cat_05,Milled Fish ( Nkejje),Milled Fish ( Nkejje),Milled Fish ( Nkejje),93.38,7.64,,11.68,,,,,2
+ing_00122,cat_05,Mineral block,Mineral block,Mineral block,93.76,,8.69,,143.8,55.4,,,2
+ing_00123,cat_05,Mineral soil,Mineral soil,Mineral soil,91.08,,0.19,,12.1,0.3,,,2
+ing_00124,cat_05,Mineral soil ('bole'),Mineral soil ('bole'),Mineral soil ('bole'),89.36,3.17,0.98,4.37,21.123,0.6,,,2
+ing_00125,cat_01,Persian clover,Persian clover,Persian clover,91.11,,13.18,28.8,,,,,80
+ing_00126,cat_04,Potato haulms,Potato haulms,Potato haulms,90.81,,14.11,,,1.673,,,30
+ing_00127,cat_04,Potato leaf,Potato leaf,Potato leaf,88.06,,21.45,39.43,10.82,2.95,,,30
+ing_00128,cat_04,Potato peel,Potato peel,Potato peel,90.38,10.67,8.38,58.59,0.7,1.6,,,30
+ing_00129,cat_04,Potato tuber,Potato tuber,Potato tuber,89.16,,8.53,,,2.828,,,30
+ing_00130,cat_02,Saltbush (A. halimus),Saltbush (A. halimus),Saltbush (A. halimus),93.91,,13.19,40.1,,,,,30
+ing_00131,cat_02,Saltbush (A. nummularia),Saltbush (A. nummularia),Saltbush (A. nummularia),91.91,,17.5,37.88,,,,,30
+ing_00132,cat_02,Senegalia ataxacantha,Senegalia ataxacantha,Senegalia ataxacantha,90.41,,28.69,38.37,,,,,30
+ing_00133,cat_02,Senegalia brevispica,Senegalia brevispica,Senegalia brevispica,92.28,9.08,20.74,43.69,16.3,2.2,,,30
+ing_00134,cat_02,Senegalia caffra,Senegalia caffra,Senegalia caffra,93.65,,14.56,44.89,,,,,30
+ing_00135,cat_02,Senegalia laeta,Senegalia laeta,Senegalia laeta,89.69,7.53,21.38,,,,,,30
+ing_00136,cat_02,Senegalia mellifera,Senegalia mellifera,Senegalia mellifera,93.48,,25.38,27.53,13.66,1.675,,,30
+ing_00137,cat_02,Senegalia polyacantha,Senegalia polyacantha,Senegalia polyacantha,90.62,,24.94,50.66,27.0,2.7,,,30
+ing_00138,cat_02,Senegalia senegal,Senegalia senegal,Senegalia senegal,92.13,,19.01,44.64,23.88,2.36,,,30
+ing_00139,cat_05,Shells,Shells,Shells,92.1,6.66,,43.3,,,,,2
+ing_00140,cat_05,Silver Fish,Silver Fish,Silver Fish,93.1,8.76,,21.04,,,,,2
+ing_00141,cat_05,Silver Fish  ( L.Albert),Silver Fish  ( L.Albert),Silver Fish  ( L.Albert),94.23,7.26,,24.78,,,,,2
+ing_00142,cat_05,Silver Fish  (L.Albert),Silver Fish  (L.Albert),Silver Fish  (L.Albert),95.59,7.54,,37.55,,,,,2
+ing_00143,cat_05,Silver Fish  Mukene (L. Victoria),Silver Fish  Mukene (L. Victoria),Silver Fish  Mukene (L. Victoria),93.2,9.34,,24.67,,,,,2
+ing_00144,cat_05,Silver Fish Mukene,Silver Fish Mukene,Silver Fish Mukene,93.77,8.96,,15.02,,,,,2
+ing_00145,cat_04,Sweet potato,Sweet potato,Sweet potato,90.94,13.05,5.65,49.28,10.7,1.8,,,30
+ing_00146,cat_04,Sweet potato leaf,Sweet potato leaf,Sweet potato leaf,92.73,,23.69,26.6,,,,,30
+ing_00147,cat_04,Sweet potato leaf + petiole,Sweet potato leaf + petiole,Sweet potato leaf + petiole,92.03,,,25.9,,,,,30
+ing_00148,cat_04,Sweet potato root,Sweet potato root,Sweet potato root,93.19,10.24,9.97,34.07,,,,,30
+ing_00149,cat_04,Sweet potato stem,Sweet potato stem,Sweet potato stem,91.68,,,39.94,,,,,30
+ing_00150,cat_04,Sweet potato stem + vines,Sweet potato stem + vines,Sweet potato stem + vines,92.41,9.4,20.14,32.91,,,,,30
+ing_00151,cat_04,Sweet potato tuber,Sweet potato tuber,Sweet potato tuber,91.0,10.46,9.19,46.2,,,,,30
+ing_00152,cat_04,Sweet potato vine silage,Sweet potato vine silage,Sweet potato vine silage,90.92,,13.35,53.66,,,,,30
+ing_00153,cat_04,Sweet potato vines,Sweet potato vines,Sweet potato vines,92.22,10.95,12.98,43.13,10.38,2.55,,,30
+ing_00154,cat_04,Sweet potato vines + tuber,Sweet potato vines + tuber,Sweet potato vines + tuber,89.96,,11.87,35.53,,,,,30
+ing_00155,cat_02,Tagasaste,Tagasaste,Tagasaste,91.17,11.36,19.58,36.54,7.796,1.548,,,30
+ing_00156,cat_02,Terminalia schimperi,Terminalia schimperi,Terminalia schimperi,88.93,,10.25,41.91,8.9,1.9,,,30
+ing_00157,cat_01,Tetrapogon roxburghiana,Tetrapogon roxburghiana,Tetrapogon roxburghiana,92.65,8.65,7.89,72.89,2.867,1.706,,,80
+ing_00158,cat_01,Urochloa brizantha,Urochloa brizantha,Urochloa brizantha,90.75,8.08,5.56,73.76,4.0,2.3,,,80
+ing_00159,cat_01,Urochloa decumbens,Urochloa decumbens,Urochloa decumbens,91.9,,2.38,75.79,2.5,1.3,,,80
+ing_00160,cat_01,Urochloa ramosa,Urochloa ramosa,Urochloa ramosa,91.76,,15.23,68.31,,2.6,,,80
+ing_00161,cat_01,Urochloa ruziziensis,Urochloa ruziziensis,Urochloa ruziziensis,91.75,,0.94,82.67,3.1,1.7,,,80
+ing_00162,cat_02,Vachellia abyssinica,Vachellia abyssinica,Vachellia abyssinica,94.24,,20.01,35.45,20.6,1.85,,,30
+ing_00163,cat_02,Vachellia erioloba,Vachellia erioloba,Vachellia erioloba,93.79,,18.99,54.29,9.2,4.05,,,30
+ing_00164,cat_02,Vachellia hebeclada,Vachellia hebeclada,Vachellia hebeclada,94.45,,26.53,48.97,,,,,30
+ing_00165,cat_02,Vachellia hockii,Vachellia hockii,Vachellia hockii,93.05,,16.5,39.59,,,,,30
+ing_00166,cat_02,Vachellia horrida,Vachellia horrida,Vachellia horrida,92.17,,15.5,39.36,,,,,30
+ing_00167,cat_02,Vachellia nilotica,Vachellia nilotica,Vachellia nilotica,92.11,,19.58,26.78,23.76,1.8,,,30
+ing_00168,cat_02,Vachellia robusta,Vachellia robusta,Vachellia robusta,93.97,,15.25,45.75,,,,,30
+ing_00169,cat_02,Vachellia seyal,Vachellia seyal,Vachellia seyal,91.64,11.28,16.91,29.41,24.325,1.48,,,30
+ing_00170,cat_02,Vachellia sieberiana,Vachellia sieberiana,Vachellia sieberiana,91.92,9.5,17.99,44.02,8.5,3.5,,,30
+ing_00171,cat_02,Vachellia tortilis,Vachellia tortilis,Vachellia tortilis,94.16,9.67,14.08,39.01,10.7,2.3,,,30
+ing_00172,cat_02,Vachellia vernicosa,Vachellia vernicosa,Vachellia vernicosa,92.35,,21.56,49.12,,,,,30
+ing_00173,cat_05,Whole Fish,Whole Fish,Whole Fish,95.76,8.35,,27.62,,,,,2
+ing_00174,cat_05,Whole Fish  (Nkejje),Whole Fish  (Nkejje),Whole Fish  (Nkejje),91.35,9.3,,15.0,,,,,2
+ing_00175,cat_05,Whole Fish  Mukene  ( L. Victoria),Whole Fish  Mukene  ( L. Victoria),Whole Fish  Mukene  ( L. Victoria),90.51,7.8,,8.97,,,,,2
+ing_00176,cat_05,Whole Fish Albert,Whole Fish Albert,Whole Fish Albert,96.81,6.17,,41.37,,,,,2
+ing_00177,cat_05,Whole Fish Mukene,Whole Fish Mukene,Whole Fish Mukene,92.98,8.76,,20.26,,,,,2
+ing_00178,cat_05,Whole Fish Mukene L. Victoria,Whole Fish Mukene L. Victoria,Whole Fish Mukene L. Victoria,93.76,9.04,,16.87,,,,,2
+ing_00179,cat_05,Whole Fish Nkejje,Whole Fish Nkejje,Whole Fish Nkejje,90.82,9.41,,9.69,,,,,2
+ing_00180,cat_05,Whole Fish Nkejje  ( L Victoria),Whole Fish Nkejje  ( L Victoria),Whole Fish Nkejje  ( L Victoria),93.23,9.42,,15.61,,,,,2
+ing_00181,cat_05,Whole Fish Nkejje  L. Albert,Whole Fish Nkejje  L. Albert,Whole Fish Nkejje  L. Albert,92.21,8.63,,10.63,,,,,2
+ing_00182,cat_05,Whole Fish Nkejje ( Tanzania),Whole Fish Nkejje ( Tanzania),Whole Fish Nkejje ( Tanzania),92.48,7.95,,11.47,,,,,2
+ing_00183,cat_05,Whole Fish Victoria,Whole Fish Victoria,Whole Fish Victoria,95.54,8.01,,26.54,,,,,2
+ing_00184,cat_05,Whole Silver Fish,Whole Silver Fish,Whole Silver Fish,95.12,7.5,,28.11,,,,,2
+ing_00185,cat_04,Yam peel,Yam peel,Yam peel,90.11,8.69,6.01,62.87,,,,,30

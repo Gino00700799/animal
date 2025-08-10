@@ -4,6 +4,7 @@ import { Download, AlertTriangle, CheckCircle, TrendingUp, DollarSign, Droplets 
 import { useLanguage } from '../contexts/LanguageContext';
 import NutritionWarnings from './NutritionWarnings';
 import NutritionAdequacyChart from './NutritionAdequacyChart';
+import NutritionBalanceDisplay from './NutritionBalanceDisplay';
 
 const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimizedDiet, validation }) => {
   const { language } = useLanguage();
@@ -60,19 +61,24 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
         <div className={`p-4 rounded-lg border-2 ${
           validation.isValid 
             ? 'border-green-300 bg-green-50' 
-            : 'border-yellow-300 bg-yellow-50'
+            : 'border-red-300 bg-red-50'
         }`}>
           <div className="flex items-center space-x-2 mb-2">
             {validation.isValid ? (
               <CheckCircle className="w-5 h-5 text-green-600" />
             ) : (
-              <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              <AlertTriangle className="w-5 h-5 text-red-600" />
             )}
             <span className={`font-semibold ${
-              validation.isValid ? 'text-green-800' : 'text-yellow-800'
+              validation.isValid ? 'text-green-800' : 'text-red-800'
             }`}>
-              {validation.isValid ? 'Dieta Balanceada' : 'Dieta con Observaciones'}
+              {validation.isValid ? 'Dieta Balanceada' : 'Dieta NICHT Balanceada'}
             </span>
+            {validation.balanceDetails && (
+              <span className="text-xs text-gray-600">
+                ({validation.balanceDetails.reasons.length} Probleme gefunden)
+              </span>
+            )}
           </div>
           
           {validation.errors.length > 0 && (
@@ -98,6 +104,13 @@ const FAOResultsDisplay = ({ animalData, selectedCategory, requirements, optimiz
           )}
         </div>
       </div>
+
+      {/* Nueva Validación de Balance */}
+      <NutritionBalanceDisplay 
+        validation={validation}
+        requirements={requirements}
+        diet={optimizedDiet}
+      />
 
       {/* Nutrition Warnings - Neue Warnungen für Energie und Trockensubstanz */}
       <NutritionWarnings 

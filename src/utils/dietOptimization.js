@@ -399,61 +399,21 @@ function calculateNutrientContribution(ingredient, amount) {
 }
 
 /**
- * Valida si una dieta cumple con los requerimientos mínimos
+ * Valida si una dieta cumple con los requerimientos mínimos usando las nuevas reglas estrictas
  */
 export const validateDiet = (diet, requirements) => {
-  const { totalNutrients } = diet;
-  const {
-    totalME,
-    crudeProteinRequired,
-    calciumRequired,
-    phosphorusRequired
-  } = requirements;
-
+  // Importar la nueva validación estricta
+  const { checkDietBalance } = require('./nutritionConstraints');
+  
+  const balanceCheck = checkDietBalance(diet, requirements);
+  
+  // Convertir al formato esperado por el UI
   const validation = {
-    isValid: true,
-    warnings: [],
-    errors: []
+    isValid: balanceCheck.isBalanced,
+    warnings: balanceCheck.warnings,
+    errors: balanceCheck.reasons,
+    balanceDetails: balanceCheck
   };
-
-  // Verificar requerimientos mínimos (85% de adecuación para ser más realista)
-  if (totalNutrients.energy < totalME * 0.85) {
-    validation.errors.push('Energía insuficiente (< 85% del requerimiento)');
-    validation.isValid = false;
-  }
-
-  if (totalNutrients.protein < crudeProteinRequired * 0.85) {
-    validation.errors.push('Proteína insuficiente (< 85% del requerimiento)');
-    validation.isValid = false;
-  }
-
-  if (totalNutrients.calcium < calciumRequired * 0.70) {
-    validation.errors.push('Calcio insuficiente (< 70% del requerimiento)');
-    validation.isValid = false;
-  }
-
-  if (totalNutrients.phosphorus < phosphorusRequired * 0.70) {
-    validation.errors.push('Fósforo insuficiente (< 70% del requerimiento)');
-    validation.isValid = false;
-  }
-
-  // Advertencias para niveles bajos pero no críticos
-  if (totalNutrients.calcium >= calciumRequired * 0.70 && totalNutrients.calcium < calciumRequired * 0.85) {
-    validation.warnings.push('Calcio bajo (70-85% del requerimiento)');
-  }
-
-  if (totalNutrients.phosphorus >= phosphorusRequired * 0.70 && totalNutrients.phosphorus < phosphorusRequired * 0.85) {
-    validation.warnings.push('Fósforo bajo (70-85% del requerimiento)');
-  }
-
-  // Verificar excesos (> 120% puede ser costoso)
-  if (totalNutrients.energy > totalME * 1.2) {
-    validation.warnings.push('Exceso de energía (> 120% del requerimiento)');
-  }
-
-  if (totalNutrients.protein > crudeProteinRequired * 1.3) {
-    validation.warnings.push('Exceso de proteína (> 130% del requerimiento)');
-  }
 
   return validation;
 };
