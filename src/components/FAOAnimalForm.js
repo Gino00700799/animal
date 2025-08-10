@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Scale, Calendar, TrendingUp, MapPin } from 'lucide-react';
+import { Scale, Calendar, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { validateActivityFactor } from '../utils/nutritionConstraints';
 
 const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
   const { t, language } = useLanguage();
@@ -9,7 +8,6 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
     weight: '',
     age: '',
     dailyGain: '',
-    activityFactor: 0.1, // factor de actividad para confinamiento
     breed: '',
     errors: {}
   });
@@ -69,19 +67,6 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         }
         break;
         
-      case 'activityFactor':
-        const validationResult = validateActivityFactor(value);
-        if (!validationResult.isValid) {
-          errors.activityFactor = validationResult.error;
-        } else {
-          delete errors.activityFactor;
-          // Migration: Update value if it was corrected
-          if (validationResult.migrated) {
-            value = validationResult.correctedValue;
-          }
-        }
-        break;
-        
       default:
         break;
     }
@@ -105,7 +90,7 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
         weight: parseFloat(newData.weight),
         age: parseFloat(newData.age),
         dailyGain: parseFloat(newData.dailyGain),
-        activityFactor: parseFloat(newData.activityFactor),
+        activityFactor: 0.1, // fixed intensive
         breed: newData.breed,
         category: selectedCategory?.id
       });
@@ -219,32 +204,6 @@ const FAOAnimalForm = ({ selectedCategory, onAnimalDataChange }) => {
           )}
           <p className="text-gray-500 text-xs mt-1">
             Rango esperado: {selectedCategory.dailyGainRange.min}-{selectedCategory.dailyGainRange.max} kg/día
-          </p>
-        </div>
-
-        {/* Factor de Actividad */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            🏠 {t('activityFactor')}
-          </label>
-          <select
-            value={animalData.activityFactor}
-            onChange={(e) => handleInputChange('activityFactor', parseFloat(e.target.value))}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              animalData.errors.activityFactor ? 'border-red-500' : 'border-gray-300'
-            }`}
-          >
-            <option value={0.1}>0.1 - {language === 'de' ? 'Intensiv (Stallhaltung)' : language === 'en' ? 'Intensive (Confinement)' : 'Intensivo (Confinamiento)'}</option>
-            <option value={0.2}>0.2 - {language === 'de' ? 'Semi-intensiv' : language === 'en' ? 'Semi-intensive' : 'Semi-intensivo'}</option>
-            <option value={0.3}>0.3 - {language === 'de' ? 'Extensiv (Weide)' : language === 'en' ? 'Extensive (Pasture)' : 'Extensivo (Pastoreo)'}</option>
-          </select>
-          {animalData.errors.activityFactor && (
-            <p className="text-red-500 text-xs mt-1">{animalData.errors.activityFactor}</p>
-          )}
-          <p className="text-gray-500 text-xs mt-1">
-            {language === 'de' ? 'Wählen Sie das Haltungssystem' : 
-             language === 'en' ? 'Select the management system' : 
-             'Selecciona el sistema de manejo'}
           </p>
         </div>
 

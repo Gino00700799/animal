@@ -3,6 +3,7 @@ import { Calculator, Download, RefreshCw, AlertTriangle, CheckCircle } from 'luc
 import { useLanguage } from '../contexts/LanguageContext';
 import { calculateCompleteNutrientRequirements } from '../utils/faoCalculations';
 import { optimizeDiet, validateDiet } from '../utils/dietOptimization';
+import { useData } from '../contexts/DataContext';
 import FAOCategorySelector from './FAOCategorySelector';
 import FAOAnimalForm from './FAOAnimalForm';
 import FAOIngredientSelector from './FAOIngredientSelector';
@@ -11,6 +12,7 @@ import MultiPeriodCalculator from './MultiPeriodCalculator';
 
 const FAODietCalculator = () => {
   const { t, language } = useLanguage();
+  const { ingredients: allIngredients } = useData();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [animalData, setAnimalData] = useState(null);
@@ -20,6 +22,8 @@ const FAODietCalculator = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [validation, setValidation] = useState(null);
   const [optimizationMethod, setOptimizationMethod] = useState('linear');
+  const [formulationMode, setFormulationMode] = useState('manual'); // 'manual' | 'automatic'
+  const [autoGenerationKey, setAutoGenerationKey] = useState(0);
 
   // Calcular requerimientos cuando cambian los datos del animal
   useEffect(() => {
@@ -38,6 +42,14 @@ const FAODietCalculator = () => {
       calculateOptimalDiet();
     }
   }, [requirements, selectedIngredients]);
+
+  // Generación automática de set de ingredientes cuando aplica
+  useEffect(() => {
+    if (formulationMode === 'automatic' && requirements) {
+      const autoSet = buildAutomaticIngredientSet(requirements, allIngredients);
+      setSelectedIngredients(autoSet);
+    }
+  }, [formulationMode, requirements, allIngredients, autoGenerationKey]);
 
   const calculateOptimalDiet = async () => {
     if (!requirements || selectedIngredients.length < 2) return;
@@ -94,6 +106,13 @@ const FAODietCalculator = () => {
 
   const handleIngredientsChange = (ingredients) => {
     setSelectedIngredients(ingredients);
+  };
+
+  const handleModeToggle = (mode) => {
+    setFormulationMode(mode);
+    setSelectedIngredients([]);
+    setOptimizedDiet(null);
+    setValidation(null);
   };
 
   const resetCalculator = () => {
@@ -201,12 +220,50 @@ const FAODietCalculator = () => {
           )}
 
           {/* Step 3: Ingredient Selection */}
-          {currentStep >= 3 && (
+          {currentStep >= 3 && formulationMode === 'manual' && (
             <FAOIngredientSelector
               selectedIngredients={selectedIngredients}
               onIngredientsChange={handleIngredientsChange}
               animalData={animalData}
             />
+          )}
+          {currentStep >= 3 && formulationMode === 'automatic' && (
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🤖 Selección Automática de Ingredientes</h3>
+              <p className="text-sm text-gray-600 mb-4">El sistema elige un conjunto representativo (forraje, ensilado, energéticos, proteicos, minerales y premix) buscando minimizar el costo y cubrir requerimientos.</p>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm border">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Ingrediente</th>
+                      <th className="px-3 py-2 text-left">Categoría</th>
+                      <th className="px-3 py-2 text-right">ME (MJ/kg MS)</th>
+                      <th className="px-3 py-2 text-right">PB (%)</th>
+                      <th className="px-3 py-2 text-right">Ca (%)</th>
+                      <th className="px-3 py-2 text-right">P (%)</th>
+                      <th className="px-3 py-2 text-right">Costo €/kg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedIngredients.map(ing => (
+                      <tr key={ing.id} className="border-t">
+                        <td className="px-3 py-2 whitespace-nowrap font-medium">{ing.name?.es || ing.id}</td>
+                        <td className="px-3 py-2">{ing.category}</td>
+                        <td className="px-3 py-2 text-right">{ing.composition.metabolizableEnergy}</td>
+                        <td className="px-3 py-2 text-right">{ing.composition.crudeProtein}</td>
+                        <td className="px-3 py-2 text-right">{ing.composition.calcium}</td>
+                        <td className="px-3 py-2 text-right">{ing.composition.phosphorus}</td>
+                        <td className="px-3 py-2 text-right">{ing.costPerKg}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button onClick={() => setAutoGenerationKey(k=>k+1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm">🔄 Regenerar Conjunto</button>
+                <button disabled={!requirements || selectedIngredients.length<2 || isCalculating} onClick={calculateOptimalDiet} className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-sm">{isCalculating? 'Calculando...' : 'Calcular Dieta Automática'}</button>
+              </div>
+            </div>
           )}
 
           {/* Calculation Status */}
@@ -296,7 +353,7 @@ const FAODietCalculator = () => {
                           (language === 'en' ? 'Valid diet' : language === 'de' ? 'Gültige Diät' : 'Dieta válida') :
                           (language === 'en' ? 'Review diet' : language === 'de' ? 'Diät überprüfen' : 'Revisar dieta')
                         }
-                      </div>
+                      </span>
                     </div>
                   )}
                   
@@ -407,3 +464,33 @@ const FAODietCalculator = () => {
 };
 
 export default FAODietCalculator;
+
+// Heurística para construir set automático
+function buildAutomaticIngredientSet(requirements, allIngredients) {
+  if (!allIngredients || allIngredients.length === 0) return [];
+  const pickBest = (list, scorer) => list.reduce((best,c)=> scorer(c)>scorer(best)?c:best, list[0]);
+  const byCat = cat => allIngredients.filter(i=>i.category===cat);
+  const sel = new Map();
+  const add = ing => { if ( ing && !sel.has(ing.id)) sel.set(ing.id, ing); };
+  // Forraje seco
+  const forrajes = byCat('forrajes_secos');
+  if (forrajes.length) add(pickBest(forrajes, i => (i.composition.metabolizableEnergy / (i.costPerKg||1)) + i.composition.crudeProtein*0.05));
+  // Ensilado
+  const ensilados = byCat('ensilados');
+  if (ensilados.length) add(pickBest(ensilados, i => i.composition.metabolizableEnergy / (i.costPerKg||1)));
+  // Energéticos (top 2)
+  const energ = byCat('alimentos_energeticos').sort((a,b)=> (b.composition.metabolizableEnergy/(b.costPerKg||1)) - (a.composition.metabolizableEnergy/(a.costPerKg||1)) ).slice(0,2);
+  energ.forEach(add);
+  // Proteicos (top 2 por proteína/costo)
+  const prots = byCat('suplementos_proteicos').sort((a,b)=> (b.composition.crudeProtein/(b.costPerKg||1)) - (a.composition.crudeProtein/(a.costPerKg||1)) ).slice(0,2);
+  prots.forEach(add);
+  // Subproducto fibroso económico (opcional)
+  const subprod = byCat('subproductos_fibro_energeticos').sort((a,b)=> ( (b.composition.metabolizableEnergy + b.composition.crudeProtein*0.3) /(b.costPerKg||1)) - ((a.composition.metabolizableEnergy + a.composition.crudeProtein*0.3)/(a.costPerKg||1)) ).slice(0,1);
+  subprod.forEach(add);
+  // Minerales estándar
+  ['carbonato_calcio','fosfato_dicalcico','sal_comun','premix_vitam_mineral'].forEach(id=> {
+    const ing = allIngredients.find(i=>i.id===id);
+    if (ing) add(ing);
+  });
+  return Array.from(sel.values());
+}

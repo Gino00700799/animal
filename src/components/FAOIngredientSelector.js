@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Plus, Minus, Info, Microscope, AlertTriangle, Edit3, DollarSign, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { faoIngredientCategories as staticFaoIngredientCategories, getIngredientsByCategory as staticGetIngredientsByCategory, getDetailedNutritionData } from '../data/faoIngredients';
+import { faoIngredientCategories as staticFaoIngredientCategories } from '../data/faoIngredients';
 import { useData } from '../contexts/DataContext';
 import { evaluateFormulationComplexity } from '../utils/ingredientComplexityManager';
 import DetailedNutritionView from './DetailedNutritionView';
@@ -579,15 +579,15 @@ const FAOIngredientSelector = ({ selectedIngredients, onIngredientsChange, anima
                     >
                       <Info className="w-4 h-4" />
                     </button>
-                    {getDetailedNutritionData(ingredient.id) && (
-                      <button
-                        onClick={() => setSelectedForDetailView(ingredient)}
-                        className="p-2 text-blue-400 hover:text-blue-600 transition-colors"
-                        title="Análisis nutricional detallado"
-                      >
-                        <Microscope className="w-4 h-4" />
-                      </button>
-                    )}
+                    {/* {getDetailedNutritionData(ingredient.id) && ( */}
+                    {/*   <button */}
+                    {/*     onClick={() => setSelectedForDetailView(ingredient)} */}
+                    {/*     className="p-2 text-blue-400 hover:text-blue-600 transition-colors" */}
+                    {/*     title="Análisis nutricional detallado" */}
+                    {/*   > */}
+                    {/*     <Microscope className="w-4 h-4" /> */}
+                    {/*   </button> */}
+                    {/* )} */}
                   </div>
                 </div>
 

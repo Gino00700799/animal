@@ -720,7 +720,7 @@ export const translations = {
     selectAnimalToCalculate: "Selecciona un animal para comenzar a calcular",
     
     // Age
-    age: "Edad (años)",
+    age: "Edad",
     agePlaceholder: "ej. 5.5",
     ageInfo: "La edad afecta el metabolismo y los requerimientos nutricionales",
     
@@ -912,129 +912,6 @@ export const translations = {
     totalDuration: "Duración total",
     finalWeight: "Peso final",
     rationEvolution: "Evolución de las Raciones",
-    
-    // Fun Facts
-    funFacts: "Datos Curiosos sobre",
-    
-    appTitle: "Calculadora de Animales Exóticos",
-    appSubtitle: "Calcula las necesidades nutricionales de animales exóticos",
-    
-    // Navigation
-    buyMeCoffee: "Cómprame un café",
-    
-    // Hero Section
-    heroTitle: "Descubre las Necesidades Nutricionales de tu Animal",
-    heroSubtitle: "Selecciona un animal exótico e ingresa sus medidas para calcular los requerimientos calóricos diarios, recomendaciones de alimentación e información nutricional basada en fórmulas científicas.",
-    
-    // Animal Selection
-    chooseAnimal: "Elige tu Animal",
-    
-    // Diet Types
-    herbivore: "Herbívoro",
-    carnivore: "Carnívoro",
-    omnivore: "Come plantas y carne",
-    
-    // Form
-    calculateFor: "Calcular para",
-    enterMeasurements: "Ingresa las medidas para calcular las necesidades nutricionales",
-    weight: "Peso (kg)",
-    height: "Altura (metros)",
-    weightRange: "Rango promedio",
-    heightRange: "Rango promedio",
-    calculateNeeds: "Calcular Necesidades Nutricionales",
-    
-    // Validation
-    validWeight: "Por favor ingresa un peso válido",
-    validHeight: "Por favor ingresa una altura válida",
-    validAge: "Por favor ingresa una edad válida",
-    weightBetween: "El peso debe estar entre 1 y 10,000 kg",
-    heightBetween: "La altura debe estar entre 0.1 y 10 metros",
-    ageBetween: "La edad debe estar entre 0.1 y 100 años",
-    selectAnimalToCalculate: "Selecciona un animal para comenzar a calcular",
-    
-    // Age
-    age: "Edad (años)",
-    agePlaceholder: "ej. 5.5",
-    ageInfo: "La edad afecta el metabolismo y los requerimientos nutricionales",
-    
-    // Results
-    nutritionalAnalysis: "Análisis Nutricional para",
-    calculateAnother: "Calcular Otro",
-    yourAnimal: "Tu Animal",
-    average: "Promedio",
-    
-    // Metrics
-    caloriesPerDay: "Calorías/día",
-    gramsOfMeat: "Gramos de carne/día",
-    litersOfWater: "Litros de agua/día",
-    bodyMassIndex: "Índice de Masa Corporal",
-    
-    // BMI Categories
-    underweight: "Bajo peso",
-    normal: "Normal",
-    overweight: "Sobrepeso",
-    obese: "Obeso",
-    
-    // Charts
-    dailyNutritionNeeds: "Necesidades Nutricionales Diarias",
-    comparisonWithAverage: "Comparación con el Promedio",
-    energyDistribution: "Distribución de Energía",
-    caloriesFromFood: "Calorías de los Alimentos",
-    energyForActivity: "Energía para Actividad",
-    metabolicProcesses: "Procesos Metabólicos",
-    
-    // Feeding Recommendations
-    feedingRecommendations: "Recomendaciones de Alimentación",
-    dailyRequirements: "Requerimientos Diarios:",
-    proTips: "Consejos Profesionales:",
-    monitorWeight: "Monitorear el peso regularmente",
-    adjustPortions: "Ajustar porciones según nivel de actividad",
-    provideEnrichment: "Proporcionar enriquecimiento ambiental",
-    consultVets: "Consultar con nutricionistas veterinarios",
-    
-    // Features Section
-    whyUseCalculator: "¿Por qué Usar Nuestra Calculadora?",
-    scientificAccuracy: "Precisión Científica",
-    scientificDesc: "Basado en investigación metabólica y pautas nutricionales veterinarias",
-    visualAnalytics: "Análisis Visual",
-    visualDesc: "Gráficos interactivos y comparaciones para mejor comprensión",
-    practicalRecommendations: "Recomendaciones Prácticas",
-    practicalDesc: "Pautas de alimentación accionables y consejos de cuidado",
-    
-    // Footer
-    madeWith: "Hecho con",
-    by: "por Rovo Dev",
-    disclaimer: "Esta calculadora proporciona estimaciones con fines educativos. Siempre consulta con profesionales veterinarios para el cuidado real de animales.",
-    privacyPolicy: "Política de Privacidad",
-    termsOfService: "Términos de Servicio",
-    
-    // Cattle Nutrition
-    professionalCattleNutrition: "Nutrición Profesional de Ganado",
-    scientificFeedingRecommendations: "Recomendaciones de alimentación científicas para",
-    developmentPhase: "Fase de Desarrollo",
-    description: "Descripción",
-    dailyCosts: "Costos Diarios",
-    estimatedFeedCosts: "Costos estimados de alimentación",
-    totalFeedRequirement: "Requerimiento total de alimento",
-    energyRequirement: "Requerimiento de energía",
-    proteinRequirement: "Requerimiento de proteína",
-    waterRequirement: "Requerimiento de agua",
-    nutritionBreakdown: "Desglose Nutricional",
-    feedComposition: "Composición del Alimento",
-    growthPhaseComparison: "Comparación de Fases de Crecimiento",
-    detailedFeedingRecommendations: "Recomendaciones Detalladas de Alimentación",
-    feedAmountsPerDay: "Cantidades de alimento por día:",
-    hay: "Heno (forraje)",
-    concentrate: "Concentrado",
-    silage: "Ensilaje (opcional)",
-    water: "Agua",
-    nutritionExplanations: "Explicaciones Nutricionales:",
-    additionalMetrics: "Métricas Adicionales:",
-    energyRequirementMJ: "Requerimiento de Energía",
-    metabolizableEnergy: "Energía Metabolizable",
-    proteinRequirementKg: "Requerimiento de Proteína",
-    digestibleCrudeProtein: "Proteína Cruda Digestible",
-    professionalNotes: "Notas Profesionales:",
     
     // Fun Facts
     funFacts: "Datos Curiosos sobre",

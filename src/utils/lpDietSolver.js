@@ -1,5 +1,4 @@
 // Solver LP para formulación de dietas usando glpk.js (WASM browser-safe)
-import GLPK from 'glpk.js';
 import { NUTRIENT_LIMITS } from './nutritionConstraints';
 import { intensiveCategoryProfiles } from '../data/intensiveCategoryRequirements';
 
@@ -220,6 +219,7 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
   };
 
   try {
+    const { default: GLPK } = await import('glpk.js');
     const glpk = await GLPK();
     const res = glpk.solve(glpkProblem, { msgLevel: 'GLP_MSG_OFF' });
     if (res.result.status !== 'glp_opt') {

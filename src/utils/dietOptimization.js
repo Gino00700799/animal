@@ -29,14 +29,13 @@ export const optimizeDiet = (requirements, ingredients, constraints = {}, method
   if (method === 'lp') {
     return runLp().then(res => {
       if (res) return res;
-      // fallback to heuristic sync path below
-      return finalizeHeuristic(requirements, ingredients, constraints);
+      return finalizeHeuristic(requirements, ingredients, constraints, method);
     });
   }
-  return finalizeHeuristic(requirements, ingredients, constraints);
+  return finalizeHeuristic(requirements, ingredients, constraints, method);
 };
 
-function finalizeHeuristic(requirements, ingredients, constraints) {
+function finalizeHeuristic(requirements, ingredients, constraints, method) {
   const { dryMatterIntake } = requirements;
   // Configurar restricciones por categoría de ingrediente (más flexibles)
   const categoryLimits = {
