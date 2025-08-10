@@ -56,7 +56,9 @@ const FAODietCalculator = () => {
         dryMatterIntake: requirements.nutrients.dryMatterIntake
       };
 
-      const diet = optimizeDiet(dietRequirements, selectedIngredients, {}, optimizationMethod);
+      const diet = optimizationMethod === 'lp'
+        ? await optimizeDiet(dietRequirements, selectedIngredients, {}, optimizationMethod)
+        : optimizeDiet(dietRequirements, selectedIngredients, {}, optimizationMethod);
       const dietValidation = validateDiet(diet, dietRequirements);
       
       setOptimizedDiet(diet);
@@ -294,7 +296,7 @@ const FAODietCalculator = () => {
                           (language === 'en' ? 'Valid diet' : language === 'de' ? 'Gültige Diät' : 'Dieta válida') :
                           (language === 'en' ? 'Review diet' : language === 'de' ? 'Diät überprüfen' : 'Revisar dieta')
                         }
-                      </span>
+                      </div>
                     </div>
                   )}
                   

@@ -2,24 +2,42 @@
 // Resuelve el problema de minimizar costo sujeto a restricciones nutricionales
 
 import { formulateWithPearsonSquare } from './pearsonSquare';
+import { solveDietLP } from './lpDietSolver';
 
 /**
  * Resuelve la formulación de dieta usando el método especificado
  * @param {object} requirements - Requerimientos nutricionales
  * @param {array} ingredients - Ingredientes disponibles
  * @param {object} constraints - Restricciones adicionales
- * @param {string} method - Método de optimización ('linear' o 'pearson')
+ * @param {string} method - Método de optimización ('linear' | 'pearson' | 'lp')
  * @returns {object} Dieta optimizada
  */
 export const optimizeDiet = (requirements, ingredients, constraints = {}, method = 'linear') => {
-  const {
-    totalME,
-    crudeProteinRequired,
-    calciumRequired,
-    phosphorusRequired,
-    dryMatterIntake
-  } = requirements;
+  // detect async solver usage
+  const runLp = async () => {
+    try {
+      const lpSolution = await solveDietLP(requirements, ingredients, constraints);
+      if (lpSolution && lpSolution.isFeasible) {
+        return { ...lpSolution, method: 'Programación Lineal (GLPK)' };
+      }
+    } catch (e) {
+      console.warn('Fallo solver LP (GLPK), se usará heurístico:', e.message);
+    }
+    return null;
+  };
+  // If LP requested return a promise the caller can await
+  if (method === 'lp') {
+    return runLp().then(res => {
+      if (res) return res;
+      // fallback to heuristic sync path below
+      return finalizeHeuristic(requirements, ingredients, constraints);
+    });
+  }
+  return finalizeHeuristic(requirements, ingredients, constraints);
+};
 
+function finalizeHeuristic(requirements, ingredients, constraints) {
+  const { dryMatterIntake } = requirements;
   // Configurar restricciones por categoría de ingrediente (más flexibles)
   const categoryLimits = {
     forrajes_secos: dryMatterIntake * 0.80, // Máximo 80% forrajes secos

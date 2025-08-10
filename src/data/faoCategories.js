@@ -1,121 +1,97 @@
-// Categorías FAO para machos de ganado vacuno de carne
+// Categorías orientadas a formulación de dietas INTENSIVAS (feedlot) para terneros, novillos y toros de carne
 export const faoCategories = {
-  becerro_destetado: {
-    id: "becerro_destetado",
-    name: {
-      es: "Becerro Destetado",
-      en: "Weaned Calf",
-      de: "Abgesetztes Kalb"
-    },
+  ternero_destetado: {
+    id: "ternero_destetado",
+    system: 'intensivo',
+    name: { es: "Ternero Destetado (Feedlot)", en: "Weaned Calf (Feedlot)", de: "Abgesetztes Kalb (Feedlot)" },
     description: {
-      es: "Terneros machos recién destetados en sistema intensivo de engorde",
-      en: "Recently weaned male calves in intensive feedlot system",
-      de: "Kürzlich abgesetzte männliche Kälber im intensiven Mastsystem"
+      es: "Ingreso a corral tras destete / fase de adaptación y arranque energético-proteico",
+      en: "Feedlot receiving phase post-weaning; adaptation to high-energy starter",
+      de: "Einstiegs-/Anpassungsphase nach dem Absetzen im Feedlot"
     },
     emoji: "🐄",
-    weightRange: { min: 150, max: 250 },
-    ageRange: { min: 4, max: 8 }, // meses
-    dailyGainRange: { min: 0.8, max: 1.2 }, // kg/día - sistema intensivo
-    defaultValues: {
-      weight: 200,
-      age: 6,
-      dailyGain: 1.0
-    }
+    // Feedlot intensivo: recepción 4-7 meses
+    ageRange: { min: 4, max: 7 },
+    weightRange: { min: 140, max: 200 },
+    dailyGainRange: { min: 0.8, max: 1.2 }, // adaptación + arranque
+    defaultValues: { weight: 170, age: 6, dailyGain: 1.0 }
   },
-  torete: {
-    id: "torete",
-    name: {
-      es: "Torete",
-      en: "Young Bull",
-      de: "Jungbulle"
-    },
+  ternero_recria: {
+    id: "ternero_recria",
+    system: 'intensivo',
+    name: { es: "Recría Temprana (Feedlot)", en: "Early Backgrounding", de: "Frühe Aufzucht" },
     description: {
-      es: "Machos jóvenes en engorde intensivo intermedio",
-      en: "Young males in intermediate intensive fattening",
-      de: "Junge Männchen in mittlerer intensiver Mast"
+      es: "Fase de recría acelerada enfocada en crecimiento óseo-muscular con dieta balanceada",
+      en: "Accelerated backgrounding focusing on frame and muscle growth",
+      de: "Beschleunigte Aufzucht mit Fokus auf Rahmen- und Muskelwachstum"
     },
-    emoji: "🐂",
-    weightRange: { min: 250, max: 350 },
-    ageRange: { min: 8, max: 14 },
-    dailyGainRange: { min: 1.0, max: 1.4 }, // sistema intensivo
-    defaultValues: {
-      weight: 300,
-      age: 11,
-      dailyGain: 1.2
-    }
+    emoji: "🧬",
+    ageRange: { min: 7, max: 10 },
+    weightRange: { min: 200, max: 280 },
+    dailyGainRange: { min: 1.1, max: 1.5 },
+    defaultValues: { weight: 240, age: 9, dailyGain: 1.3 }
   },
-  novillo: {
-    id: "novillo",
-    name: {
-      es: "Novillo",
-      en: "Steer",
-      de: "Ochse"
-    },
+  novillo_crecimiento: {
+    id: "novillo_crecimiento",
+    system: 'intensivo',
+    name: { es: "Crecimiento Intensivo", en: "Intensive Growing", de: "Intensives Wachstum" },
     description: {
-      es: "Machos castrados en engorde intensivo avanzado",
-      en: "Castrated males in advanced intensive fattening",
-      de: "Kastrierte Männchen in fortgeschrittener intensiver Mast"
+      es: "Fase de crecimiento medio; incremento de energía manteniendo proteína adecuada",
+      en: "Mid growing phase; higher energy with adequate protein",
+      de: "Mittlere Wachstumsphase; höhere Energie bei ausreichendem Protein"
     },
-    emoji: "🐃",
-    weightRange: { min: 350, max: 450 },
-    ageRange: { min: 14, max: 20 },
-    dailyGainRange: { min: 1.2, max: 1.6 }, // sistema intensivo
-    defaultValues: {
-      weight: 400,
-      age: 17,
-      dailyGain: 1.4
-    }
+    emoji: "📈",
+    ageRange: { min: 10, max: 14 },
+    weightRange: { min: 280, max: 380 },
+    dailyGainRange: { min: 1.2, max: 1.6 },
+    defaultValues: { weight: 330, age: 12, dailyGain: 1.4 }
   },
-  novillo_final: {
-    id: "novillo_final",
-    name: {
-      es: "Novillo Final (Engorde)",
-      en: "Finishing Steer",
-      de: "Mastochse (Endmast)"
-    },
+  novillo_engorde: {
+    id: "novillo_engorde",
+    system: 'intensivo',
+    name: { es: "Engorde Intermedio", en: "Intermediate Fattening", de: "Zwischenmast" },
     description: {
-      es: "Machos en engorde intensivo final, máxima ganancia de peso",
-      en: "Males in final intensive fattening, maximum weight gain",
-      de: "Männchen in der finalen intensiven Mast, maximale Gewichtszunahme"
+      es: "Transición a dietas de mayor concentración energética (grano + subproductos)",
+      en: "Transition to higher energy (grain/subproduct) diets",
+      de: "Übergang zu energiereicheren (Getreide/Subprodukt) Rationen"
     },
     emoji: "🥩",
-    weightRange: { min: 450, max: 650 },
-    ageRange: { min: 20, max: 24 },
-    dailyGainRange: { min: 1.4, max: 1.8 }, // sistema intensivo final
-    defaultValues: {
-      weight: 550,
-      age: 22,
-      dailyGain: 1.6
-    }
+    ageRange: { min: 14, max: 18 },
+    weightRange: { min: 380, max: 470 },
+    dailyGainRange: { min: 1.3, max: 1.8 },
+    defaultValues: { weight: 420, age: 16, dailyGain: 1.5 }
   },
-  toro_adulto: {
-    id: "toro_adulto",
-    name: {
-      es: "Toro Adulto",
-      en: "Adult Bull",
-      de: "Erwachsener Bulle"
-    },
+  novillo_terminacion: {
+    id: "novillo_terminacion",
+    system: 'intensivo',
+    name: { es: "Terminación", en: "Finishing", de: "Endmast" },
     description: {
-      es: "Machos enteros para reproducción o mantenimiento",
-      en: "Intact males for breeding or maintenance",
-      de: "Intakte Männchen für Zucht oder Erhaltung"
+      es: "Fase final para maximizar acabado y peso canal con alta densidad energética",
+      en: "Final phase to maximize finish and carcass weight with high energy density",
+      de: "Letzte Phase zur Maximierung von Fettabdeckung und Schlachtgewicht"
+    },
+    emoji: "✅",
+    ageRange: { min: 16, max: 20 },
+    weightRange: { min: 420, max: 520 },
+    dailyGainRange: { min: 1.4, max: 1.9 },
+    defaultValues: { weight: 470, age: 18, dailyGain: 1.6 }
+  },
+  toro_engorde: {
+    id: "toro_engorde",
+    system: 'intensivo',
+    name: { es: "Toro Engorde Intensivo", en: "Intensive Bull Fattening", de: "Intensive Bullenmast" },
+    description: {
+      es: "Toros enteros en feedlot (mayor potencial de crecimiento y eficiencia proteica)",
+      en: "Intact bulls in feedlot (higher growth potential and protein efficiency)",
+      de: "Intakte Bullen im Feedlot (höheres Wachstumspotential)"
     },
     emoji: "🐂",
-    weightRange: { min: 650, max: 1200 },
-    ageRange: { min: 24, max: 120 },
-    dailyGainRange: { min: 0, max: 0.3 }, // mantenimiento
-    defaultValues: {
-      weight: 800,
-      age: 36,
-      dailyGain: 0
-    }
+    ageRange: { min: 12, max: 18 },
+    weightRange: { min: 350, max: 520 },
+    dailyGainRange: { min: 1.5, max: 2.0 },
+    defaultValues: { weight: 450, age: 15, dailyGain: 1.7 }
   }
 };
 
-export const getCategoryById = (categoryId) => {
-  return faoCategories[categoryId] || null;
-};
-
-export const getAllCategories = () => {
-  return Object.values(faoCategories);
-};
+export const getCategoryById = (categoryId) => faoCategories[categoryId] || null;
+export const getAllCategories = () => Object.values(faoCategories);
