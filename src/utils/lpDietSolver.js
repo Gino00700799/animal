@@ -1,6 +1,55 @@
 // Solver LP para formulación de dietas usando glpk.js (WASM browser-safe)
 import { NUTRIENT_LIMITS } from './nutritionConstraints';
 import { intensiveCategoryProfiles } from '../data/intensiveCategoryRequirements';
+import GLPKFactory from 'glpk.js';
+
+// Helper to resolve WASM path in CRA (expects glpk.wasm placed in public root or at /glpk/glpk.wasm)
+function resolveGlpkWasmPath() {
+  if (typeof process !== 'undefined' && process.env && process.env.PUBLIC_URL) {
+    return process.env.PUBLIC_URL + '/glpk.wasm';
+  }
+  return '/glpk.wasm';
+}
+
+let glpkInstancePromise = null;
+let glpkAvailabilityChecked = false;
+let glpkWasmPresent = null; // tri-state: null unknown, boolean once checked
+
+async function checkGlpkWasmExists(wasmPath) {
+  if (glpkAvailabilityChecked) return glpkWasmPresent;
+  glpkAvailabilityChecked = true;
+  try {
+    const res = await fetch(wasmPath, { method: 'HEAD' });
+    glpkWasmPresent = res.ok;
+    if (!res.ok) console.warn('[GLPK] WASM not found at', wasmPath, 'status', res.status);
+  } catch (e) {
+    console.warn('[GLPK] WASM HEAD check failed', e);
+    glpkWasmPresent = false;
+  }
+  return glpkWasmPresent;
+}
+
+async function getGlpkInstance() {
+  if (!glpkInstancePromise) {
+    const wasmPath = resolveGlpkWasmPath();
+    // Pre-flight check to avoid uncaught ErrorEvent from failed internal WASM fetch
+    const exists = await checkGlpkWasmExists(wasmPath);
+    if (!exists) {
+      console.warn('[GLPK] Skipping initialization – glpk.wasm missing. Using heuristic fallback.');
+      return null; // Force caller to fallback
+    }
+    console.log('[GLPK] Initializing with wasm path', wasmPath);
+    glpkInstancePromise = GLPKFactory({ locateFile: (file) => {
+      if (file === 'glpk.wasm') return wasmPath; // custom path
+      return file;
+    }}).catch(err => {
+      console.error('[GLPK] Initialization failed', err);
+      glpkInstancePromise = null;
+      throw err;
+    });
+  }
+  return glpkInstancePromise;
+}
 
 /**
  * Construye y resuelve un modelo LP de minimización de costo con múltiples restricciones nutricionales usando GLPK
@@ -8,7 +57,13 @@ import { intensiveCategoryProfiles } from '../data/intensiveCategoryRequirements
  * Objetivo: minimizar costo total
  */
 export async function solveDietLP(requirements, ingredients, constraints = {}) {
-  const { totalME, crudeProteinRequired, calciumRequired, phosphorusRequired, dryMatterIntake } = requirements;
+  console.log('[LP] solveDietLP start', { requirements, ingredientCount: ingredients?.length, constraints });
+  const { totalME, crudeProteinRequired, calciumRequired, phosphorusRequired, dryMatterIntake } = requirements || {};
+  if (!requirements || !ingredients || ingredients.length === 0) {
+    console.warn('[LP] Missing requirements or ingredients');
+    return { isFeasible: false, message: 'Faltan datos para optimizar' };
+  }
+
   const category = constraints.category;
   const profile = category ? intensiveCategoryProfiles[category] : null;
   if (!ingredients || ingredients.length === 0) return null;
@@ -72,11 +127,15 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     addRow('fat_density_max', 'glp_up', 0, 0, {});
   }
 
-  // General NDF if no profile
+  // General NDF if no profile (ya existe). Añadir límite global de grasa si definido
   if (!profile && NUTRIENT_LIMITS?.ndf_pct_dm) {
     const ndfMinKg = dryMatterIntake * NUTRIENT_LIMITS.ndf_pct_dm.min;
     const ndfMaxKg = dryMatterIntake * NUTRIENT_LIMITS.ndf_pct_dm.max;
     addRow('ndf_range', 'glp_db', +ndfMinKg.toFixed(4), +ndfMaxKg.toFixed(4), {});
+  }
+  if (NUTRIENT_LIMITS?.fat_pct_dm?.max) {
+    const fatMaxKg = dryMatterIntake * NUTRIENT_LIMITS.fat_pct_dm.max;
+    addRow('fat_max', 'glp_up', 0, +fatMaxKg.toFixed(4), {});
   }
 
   // Ca:P ratio -> calcium - R * phosphorus >= 0 and <= 0 for min/max
@@ -114,13 +173,20 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     const comp = ing.composition;
     if (!comp?.dryMatter || !comp.metabolizableEnergy) return;
     const dmF = comp.dryMatter / 100; // DM fraction
+    // Mapear NDF: usar comp.ndf si existe, sino fallback a comp.fiber
+    const ndfPct = comp.ndf != null ? comp.ndf : (comp.fiber != null ? comp.fiber : null);
+    // Asignar crudeFat para aceite / sebo si no definido
+    let crudeFatPct = comp.crudeFat;
+    if (crudeFatPct == null) {
+      if (ing.id === 'aceite_soya' || ing.id === 'sebo_bovino') crudeFatPct = 100;
+    }
     const energyKg = dmF * comp.metabolizableEnergy;
     const proteinKg = dmF * (comp.crudeProtein || 0) / 100;
     const calciumKg = dmF * (comp.calcium || 0) / 100;
     const phosphorusKg = dmF * (comp.phosphorus || 0) / 100;
-    const ndfKg = comp.ndf != null ? dmF * (comp.ndf / 100) : 0;
+    const ndfKg = ndfPct != null ? dmF * (ndfPct / 100) : 0;
     const starchKg = comp.starch != null ? dmF * (comp.starch / 100) : 0;
-    const fatKg = comp.crudeFat != null ? dmF * (comp.crudeFat / 100) : 0;
+    const fatKg = crudeFatPct != null ? dmF * (crudeFatPct / 100) : 0;
 
     const col = varIndexMap[ing.id];
 
@@ -159,12 +225,8 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     if (!profile && NUTRIENT_LIMITS?.ndf_pct_dm) {
       setCoeff('ndf_range', ndfKg);
     }
-
-    if (NUTRIENT_LIMITS?.ca_p_ratio) {
-      const minR = NUTRIENT_LIMITS.ca_p_ratio.min;
-      const maxR = NUTRIENT_LIMITS.ca_p_ratio.max;
-      setCoeff('ca_p_min', calciumKg - minR * phosphorusKg);
-      setCoeff('ca_p_max', calciumKg - maxR * phosphorusKg);
+    if (NUTRIENT_LIMITS?.fat_pct_dm?.max) {
+      setCoeff('fat_max', fatKg);
     }
 
     // Category caps
@@ -182,14 +244,19 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
 
     // Ingredient individual limit (share default) -> create row with upper bound of kg DM
     const explicitIngLimit = constraints.ingredientLimits?.[ing.id]?.max;
-    let maxKg = null;
-    if (explicitIngLimit) {
-      maxKg = explicitIngLimit; // as-fed upper limit
+    // maxUsage (%) -> límite en kg de MS: (maxUsage/100)*dryMatterIntake
+    let maxKgDM = null;
+    if (ing.maxUsage != null) {
+      maxKgDM = dryMatterIntake * (ing.maxUsage / 100);
     }
-    if (maxKg != null) {
-      const rowName = ing.id + '_max';
-      addRow(rowName, 'glp_up', 0, maxKg, { [col]: 1 });
-      ingredientLimitRows.push(rowName);
+    if (explicitIngLimit) {
+      // si se pasa límite explícito (as-fed), se prioriza ese (convertir a DM si quisieras, aquí se deja as-fed clásico)
+      const rowName = ing.id + '_max_explicit';
+      addRow(rowName, 'glp_up', 0, explicitIngLimit, { [col]: 1 });
+    }
+    if (maxKgDM != null) {
+      const rowName = ing.id + '_maxUsage';
+      addRow(rowName, 'glp_up', 0, +maxKgDM.toFixed(4), { [col]: dmF });
     }
 
     // Forage min
@@ -219,11 +286,15 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
   };
 
   try {
-    const { default: GLPK } = await import('glpk.js');
-    const glpk = await GLPK();
+    const glpk = await getGlpkInstance();
+    if (!glpk || !glpk.solve) {
+      return { isFeasible:false, message:'GLPK no disponible (WASM no cargado)', profileApplied: !!profile };
+    }
+    console.log('[LP] GLPK instance ready');
     const res = glpk.solve(glpkProblem, { msgLevel: 'GLP_MSG_OFF' });
-    if (res.result.status !== 'glp_opt') {
-      return { isFeasible: false, message: 'Modelo infeasible', profileApplied: !!profile };
+    console.log('[LP] Solve status', res.result?.status);
+    if (!res.result || res.result.status !== 'glp_opt') {
+      return { isFeasible: false, message: res.result ? 'Modelo infeasible' : 'Error interno solver', profileApplied: !!profile };
     }
 
     // Extract solution
@@ -237,14 +308,19 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
       if (qty && qty > 1e-6) {
         const c = ing.composition;
         const dmF = c.dryMatter / 100;
+        const ndfPct = c.ndf != null ? c.ndf : (c.fiber != null ? c.fiber : null);
+        let crudeFatPct = c.crudeFat;
+        if (crudeFatPct == null) {
+          if (ing.id === 'aceite_soya' || ing.id === 'sebo_bovino') crudeFatPct = 100;
+        }
         const energy = qty * dmF * c.metabolizableEnergy;
         const protein = qty * dmF * (c.crudeProtein || 0) / 100;
         const calcium = qty * dmF * (c.calcium || 0) / 100 * 1000; // g
         const phosphorus = qty * dmF * (c.phosphorus || 0) / 100 * 1000; // g
         const dm = qty * dmF;
-        const ndf = c.ndf != null ? dm * (c.ndf / 100) : 0;
+        const ndf = ndfPct != null ? dm * (ndfPct / 100) : 0;
         const starch = c.starch != null ? dm * (c.starch / 100) : 0;
-        const fat = c.crudeFat != null ? dm * (c.crudeFat / 100) : 0;
+        const fat = crudeFatPct != null ? dm * (crudeFatPct / 100) : 0;
 
         totalCost += qty * (ing.costPerKg || 0);
         totals.energy += energy;
@@ -305,6 +381,6 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     };
   } catch (err) {
     console.warn('GLPK solve error:', err);
-    return { isFeasible: false, message: err.message || 'Error en solver', profileApplied: !!profile };
+    return { isFeasible: false, message: err.message || 'Error en solver', profileApplied: !!profile, error: true };
   }
 }

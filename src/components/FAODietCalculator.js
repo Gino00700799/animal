@@ -21,9 +21,11 @@ const FAODietCalculator = () => {
   const [optimizedDiet, setOptimizedDiet] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [validation, setValidation] = useState(null);
-  const [optimizationMethod, setOptimizationMethod] = useState('linear');
-  const [formulationMode, setFormulationMode] = useState('manual'); // 'manual' | 'automatic'
-  const [autoGenerationKey, setAutoGenerationKey] = useState(0);
+  const [optimizationMethod, setOptimizationMethod] = useState('lp');
+  // Remove formulation mode toggle; always manual + optional automatic generation
+  const [autoIngredients, setAutoIngredients] = useState([]);
+  const [autoDiet, setAutoDiet] = useState(null);
+  const [isAutoCalculating, setIsAutoCalculating] = useState(false);
 
   // Calcular requerimientos cuando cambian los datos del animal
   useEffect(() => {
@@ -42,14 +44,6 @@ const FAODietCalculator = () => {
       calculateOptimalDiet();
     }
   }, [requirements, selectedIngredients]);
-
-  // Generación automática de set de ingredientes cuando aplica
-  useEffect(() => {
-    if (formulationMode === 'automatic' && requirements) {
-      const autoSet = buildAutomaticIngredientSet(requirements, allIngredients);
-      setSelectedIngredients(autoSet);
-    }
-  }, [formulationMode, requirements, allIngredients, autoGenerationKey]);
 
   const calculateOptimalDiet = async () => {
     if (!requirements || selectedIngredients.length < 2) return;
@@ -87,6 +81,61 @@ const FAODietCalculator = () => {
     }
   };
 
+  const generateAutomaticDiet = async () => {
+    if (!requirements) return;
+    if (!requirements.energy?.totalME || !requirements.nutrients?.dryMatterIntake) {
+      console.warn('[AUTO] Requerimientos incompletos', requirements);
+      setAutoDiet({ isFeasible:false, composition:[], totalNutrients:{ energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message:'Requerimientos incompletos' });
+      return;
+    }
+    setIsAutoCalculating(true);
+    console.log('[AUTO] Generating automatic diet');
+    try {
+      console.log('[AUTO] Total ingredients loaded', allIngredients?.length);
+      if (!allIngredients || allIngredients.length === 0) {
+        setAutoDiet({ isFeasible:false, composition:[], totalNutrients:{ energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message:'Ingredientes no cargados (CSV vacío o error de fetch)' });
+        return;
+      }
+      const autoSet = buildAutomaticIngredientSet(requirements, allIngredients) || [];
+      console.log('[AUTO] Ingredient set size', autoSet.length, autoSet.map(i=>i.id));
+      setAutoIngredients(autoSet);
+      if (autoSet.length < 2) {
+        setAutoDiet({ isFeasible: false, composition: [], totalNutrients: { energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message:'Set insuficiente (menos de 2 ingredientes)' });
+        return;
+      }
+      const dietRequirements = {
+        totalME: requirements.energy.totalME,
+        crudeProteinRequired: requirements.nutrients.crudeProteinRequired,
+        calciumRequired: requirements.nutrients.calciumRequired,
+        phosphorusRequired: requirements.nutrients.phosphorusRequired,
+        dryMatterIntake: requirements.nutrients.dryMatterIntake
+      };
+      let diet;
+      try {
+        diet = await optimizeDiet(dietRequirements, autoSet, {}, 'lp');
+      } catch (solverErr) {
+        console.error('[AUTO] optimizeDiet threw', solverErr);
+        diet = { isFeasible:false, composition:[], totalNutrients:{ energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message: 'Excepción solver: '+ (solverErr?.message||String(solverErr)) };
+      }
+      console.log('[AUTO] Diet result', diet);
+      if (!diet || !diet.totalNutrients) {
+        setAutoDiet({ isFeasible:false, composition:[], totalNutrients:{ energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message:diet?.message||'Error solver (sin totalNutrients)' });
+        return;
+      }
+      if (diet && Array.isArray(diet.composition)) {
+        setAutoDiet(diet);
+        setCurrentStep(s => s < 3 ? 3 : s);
+      } else {
+        setAutoDiet({ isFeasible:false, composition: [], totalNutrients: { energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message: diet?.message || 'Sin solución' });
+      }
+    } catch (e) {
+      console.error('[AUTO] Error automatic diet (outer):', e);
+      setAutoDiet({ isFeasible:false, composition: [], totalNutrients: { energy:0, protein:0, calcium:0, phosphorus:0, dryMatter:0 }, totalCost:0, message: e?.message ? 'Error: '+e.message : 'Error generando dieta (ver consola)' });
+    } finally {
+      setIsAutoCalculating(false);
+    }
+  };
+
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
     setCurrentStep(2);
@@ -106,13 +155,6 @@ const FAODietCalculator = () => {
 
   const handleIngredientsChange = (ingredients) => {
     setSelectedIngredients(ingredients);
-  };
-
-  const handleModeToggle = (mode) => {
-    setFormulationMode(mode);
-    setSelectedIngredients([]);
-    setOptimizedDiet(null);
-    setValidation(null);
   };
 
   const resetCalculator = () => {
@@ -219,50 +261,170 @@ const FAODietCalculator = () => {
             />
           )}
 
+          {/* New Requirements Card between Animal Data and Ingredients */}
+          {currentStep >= 2 && requirements && (
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                📌 {language === 'en' ? 'Requirements' : language === 'de' ? 'Bedarfswerte' : 'Requerimientos'}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                {/* energy */}
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="font-medium text-blue-800">{language==='en'?'Total Energy':language==='de'?'Gesamtenergie':'Energía Total'}</div>
+                  <div className="text-blue-600 font-mono">{requirements.energy.totalME} MJ</div>
+                </div>
+                {/* protein */}
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="font-medium text-green-800">{language==='en'?'Crude Protein':language==='de'?'Rohprotein':'Proteína Bruta'}</div>
+                  <div className="text-green-600 font-mono">{requirements.nutrients.crudeProteinRequired} kg</div>
+                  <div className="text-xs text-green-500">{((requirements.nutrients.crudeProteinRequired / requirements.nutrients.dryMatterIntake) * 100).toFixed(1)}% MS</div>
+                </div>
+                {/* calcium */}
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <div className="font-medium text-yellow-800">Ca</div>
+                  <div className="text-yellow-600 font-mono">{requirements.nutrients.calciumRequired} g</div>
+                </div>
+                {/* phosphorus */}
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <div className="font-medium text-orange-800">P</div>
+                  <div className="text-orange-600 font-mono">{requirements.nutrients.phosphorusRequired} g</div>
+                </div>
+                {/* DMI */}
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <div className="font-medium text-purple-800">{language==='en'?'Dry Matter Intake':language==='de'?'Trockenmasseaufnahme':'Materia Seca'}</div>
+                  <div className="text-purple-600 font-mono">{requirements.nutrients.dryMatterIntake} kg</div>
+                </div>
+              </div>
+              <div className="mt-4 text-xs text-gray-500">
+                {language==='en'? 'Daily requirements derived from animal inputs.' : language==='de'? 'Täglicher Bedarf basierend auf Tierdaten.' : 'Requerimientos diarios según los datos del animal.'}
+              </div>
+            </div>
+          )}
+
+          {/* Separate Automatic Diet Generation Card (outside requirements) */}
+          {currentStep >= 2 && requirements && (
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-800">🤖 {language==='en'?'Automatic Diet Generator':'Generador de Dieta Automática'}</h3>
+                <button
+                  onClick={generateAutomaticDiet}
+                  disabled={isAutoCalculating}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${isAutoCalculating? 'bg-green-300 text-white' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                >{isAutoCalculating ? (language==='en'?'Generating...':'Generando...') : (language==='en'?'Generate Automatic Diet':'Generar Dieta Automática')}</button>
+              </div>
+              <p className="text-sm text-gray-600">
+                {language==='en'
+                  ? 'Creates a representative low-cost ingredient set and solves with Linear Programming.'
+                  : language==='de'
+                  ? 'Erstellt ein repräsentatives kostengünstiges Zutatenset und löst per Linearer Programmierung.'
+                  : 'Crea un set representativo de bajo costo y resuelve con Programación Lineal.'}
+              </p>
+              <p className="mt-2 text-xs text-gray-500">{language==='en'? 'Available after entering animal data.' : language==='de'? 'Verfügbar nach Eingabe der Tierdaten.' : 'Disponible tras ingresar los datos del animal.'}</p>
+              {isAutoCalculating && (
+                <div className="mt-4 flex items-center space-x-3 text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500" />
+                  <span>{language==='en'?'Calculating optimal mix...':'Calculando mezcla óptima...'}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Step 3: Ingredient Selection */}
-          {currentStep >= 3 && formulationMode === 'manual' && (
+          {currentStep >= 3 && (
             <FAOIngredientSelector
               selectedIngredients={selectedIngredients}
               onIngredientsChange={handleIngredientsChange}
               animalData={animalData}
             />
           )}
-          {currentStep >= 3 && formulationMode === 'automatic' && (
+          {currentStep >= 3 && autoDiet && Array.isArray(autoDiet.composition) && (
             <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">🤖 Selección Automática de Ingredientes</h3>
-              <p className="text-sm text-gray-600 mb-4">El sistema elige un conjunto representativo (forraje, ensilado, energéticos, proteicos, minerales y premix) buscando minimizar el costo y cubrir requerimientos.</p>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm border">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Ingrediente</th>
-                      <th className="px-3 py-2 text-left">Categoría</th>
-                      <th className="px-3 py-2 text-right">ME (MJ/kg MS)</th>
-                      <th className="px-3 py-2 text-right">PB (%)</th>
-                      <th className="px-3 py-2 text-right">Ca (%)</th>
-                      <th className="px-3 py-2 text-right">P (%)</th>
-                      <th className="px-3 py-2 text-right">Costo €/kg</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedIngredients.map(ing => (
-                      <tr key={ing.id} className="border-t">
-                        <td className="px-3 py-2 whitespace-nowrap font-medium">{ing.name?.es || ing.id}</td>
-                        <td className="px-3 py-2">{ing.category}</td>
-                        <td className="px-3 py-2 text-right">{ing.composition.metabolizableEnergy}</td>
-                        <td className="px-3 py-2 text-right">{ing.composition.crudeProtein}</td>
-                        <td className="px-3 py-2 text-right">{ing.composition.calcium}</td>
-                        <td className="px-3 py-2 text-right">{ing.composition.phosphorus}</td>
-                        <td className="px-3 py-2 text-right">{ing.costPerKg}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 flex gap-3">
-                <button onClick={() => setAutoGenerationKey(k=>k+1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm">🔄 Regenerar Conjunto</button>
-                <button disabled={!requirements || selectedIngredients.length<2 || isCalculating} onClick={calculateOptimalDiet} className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-sm">{isCalculating? 'Calculando...' : 'Calcular Dieta Automática'}</button>
-              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🤖 {language==='en'?'Automatic Least-Cost Diet':'Dieta Automática de Mínimo Costo'}</h3>
+              {autoDiet.message && (
+                <div className={`mb-3 text-xs ${autoDiet.isFeasible? 'text-green-600':'text-gray-600'}`}>⚠️ {autoDiet.message}</div>
+              )}
+              {!autoDiet.isFeasible && autoDiet.composition.length===0 && (
+                <div className="mb-4 text-sm text-red-600">
+                  {autoDiet.message || (language==='en'?'No feasible solution':'Sin solución factible')}
+                </div>
+              )}
+              <p className="text-sm text-gray-600 mb-4">{language==='en'? 'Automatically selected ingredients and optimized mix.' : language==='de'? 'Automatisch gewählte Zutaten und optimierte Mischung.' : 'Ingredientes seleccionados automáticamente y mezcla optimizada.'}</p>
+              {autoDiet.composition.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto mb-6">
+                    <table className="min-w-full text-xs md:text-sm border">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left">{language==='en'?'Ingredient':'Ingrediente'}</th>
+                          <th className="px-2 py-2 text-right">{language==='en'?'As-Fed kg/d':'Kg Fresco/d'}</th>
+                          <th className="px-2 py-2 text-right">MS kg</th>
+                          <th className="px-2 py-2 text-right">ME MJ</th>
+                          <th className="px-2 py-2 text-right">PB kg</th>
+                          <th className="px-2 py-2 text-right">Ca g</th>
+                          <th className="px-2 py-2 text-right">P g</th>
+                          <th className="px-2 py-2 text-right">€/d</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {autoDiet.composition.map(row => {
+                          const dm = row.amount * (row.ingredient.composition.dryMatter/100);
+                          const me = dm * row.ingredient.composition.metabolizableEnergy;
+                          const pb = dm * (row.ingredient.composition.crudeProtein/100);
+                          const ca = dm * (row.ingredient.composition.calcium/100) * 1000; // g
+                          const p = dm * (row.ingredient.composition.phosphorus/100) * 1000; // g
+                          const cost = row.amount * (row.ingredient.costPerKg || 0);
+                          return (
+                            <tr key={row.ingredient.id} className="border-t">
+                              <td className="px-2 py-2 font-medium whitespace-nowrap">{row.ingredient.name?.es || row.ingredient.id}</td>
+                              <td className="px-2 py-2 text-right">{row.amount.toFixed(2)}</td>
+                              <td className="px-2 py-2 text-right">{dm.toFixed(2)}</td>
+                              <td className="px-2 py-2 text-right">{me.toFixed(1)}</td>
+                              <td className="px-2 py-2 text-right">{pb.toFixed(2)}</td>
+                              <td className="px-2 py-2 text-right">{ca.toFixed(0)}</td>
+                              <td className="px-2 py-2 text-right">{p.toFixed(0)}</td>
+                              <td className="px-2 py-2 text-right">€{cost.toFixed(2)}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot className="bg-gray-50 font-semibold">
+                        <tr>
+                          <td className="px-2 py-2">Total</td>
+                          <td className="px-2 py-2 text-right">{autoDiet.composition.reduce((s,r)=>s+r.amount,0).toFixed(2)}</td>
+                          <td className="px-2 py-2 text-right">{autoDiet.totalNutrients.dryMatter?.toFixed(2) || '0.00'}</td>
+                          <td className="px-2 py-2 text-right">{autoDiet.totalNutrients.energy?.toFixed(1) || '0.0'}</td>
+                          <td className="px-2 py-2 text-right">{autoDiet.totalNutrients.protein?.toFixed(2) || '0.00'}</td>
+                          <td className="px-2 py-2 text-right">{(autoDiet.totalNutrients.calcium*1000 || 0).toFixed(0)}</td>
+                          <td className="px-2 py-2 text-right">{(autoDiet.totalNutrients.phosphorus*1000 || 0).toFixed(0)}</td>
+                          <td className="px-2 py-2 text-right">€{autoDiet.totalCost?.toFixed(2) || '0.00'}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs md:text-sm">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="font-medium text-blue-800">ME</div>
+                      <div className="text-blue-600">{autoDiet.totalNutrients.energy?.toFixed(1) || '0.0'} / {requirements.energy.totalME} MJ</div>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="font-medium text-green-800">PB</div>
+                      <div className="text-green-600">{autoDiet.totalNutrients.protein?.toFixed(2) || '0.00'} / {requirements.nutrients.crudeProteinRequired} kg</div>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="font-medium text-yellow-800">Ca</div>
+                      <div className="text-yellow-600">{((autoDiet.totalNutrients.calcium||0)*1000).toFixed(0)} / {requirements.nutrients.calciumRequired} g</div>
+                    </div>
+                    <div className="bg-orange-50 p-3 rounded-lg">
+                      <div className="font-medium text-orange-800">P</div>
+                      <div className="text-orange-600">{((autoDiet.totalNutrients.phosphorus||0)*1000).toFixed(0)} / {requirements.nutrients.phosphorusRequired} g</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-gray-500">
+                  {language==='en'?'No feasible automatic solution (check constraints).':'Sin solución automática factible (revisa restricciones).'}
+                </div>
+              )}
             </div>
           )}
 
@@ -274,71 +436,39 @@ const FAODietCalculator = () => {
                   <Calculator className="w-6 h-6 text-blue-500" />
                   <div>
                     <h3 className="font-semibold text-gray-800">
-                      {language === 'en' ? 'Optimization Method' :
-                       language === 'de' ? 'Optimierungsmethode' :
-                       'Método de Optimización'}
+                      {language === 'en' ? 'Optimization (LP GLPK)' :
+                       language === 'de' ? 'Optimierung (LP GLPK)' :
+                       'Optimización (LP GLPK)'}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {language === 'en' ? 'Select the diet formulation method' :
-                       language === 'de' ? 'Wählen Sie die Rationsformulierungsmethode' :
-                       'Selecciona el método de formulación de la dieta'}
+                      {language === 'en' ? 'Linear programming solver (GLPK) minimizing cost' :
+                       language === 'de' ? 'Lineare Programmierung (GLPK) zur Kostenminimierung' :
+                       'Programación lineal (GLPK) minimizando costo'}
                     </p>
                   </div>
-                </div>
-                
-                <div className="flex bg-gray-100 rounded-lg p-1">
-                  <button
-                    onClick={() => setOptimizationMethod('linear')}
-                    className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                      optimizationMethod === 'linear' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-                    }`}
-                  >
-                    📊 {language === 'en' ? 'Linear Programming' :
-                         language === 'de' ? 'Lineare Programmierung' :
-                         'Programación Lineal'}
-                  </button>
-                  <button
-                    onClick={() => setOptimizationMethod('pearson')}
-                    className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                      optimizationMethod === 'pearson' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600'
-                    }`}
-                  >
-                    ⚖️ {language === 'en' ? 'Pearson Square' :
-                         language === 'de' ? 'Pearson-Quadrat' :
-                         'Cuadrado de Pearson'}
-                  </button>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    optimizationMethod === 'linear' ? 'bg-blue-500' : 'bg-green-500'
-                  }`}></div>
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                   <div>
-                    <h4 className="font-medium text-gray-800">
-                      {optimizationMethod === 'linear' ? 'Programación Lineal Heurística' : 'Cuadrado de Pearson Clásico'}
-                    </h4>
+                    <h4 className="font-medium text-gray-800">Programación Lineal (GLPK)</h4>
                     <p className="text-sm text-gray-600">
                       {isCalculating 
                         ? 'Optimizando dieta...'
                         : selectedIngredients.length < 2
                         ? 'Selecciona al menos 2 ingredientes'
                         : optimizedDiet
-                        ? `Dieta calculada con ${optimizedDiet.method || optimizationMethod}`
-                        : optimizationMethod === 'linear' 
-                        ? 'Optimiza múltiples ingredientes por categorías'
-                        : 'Balancea 2 ingredientes principales por nutriente objetivo'
-                      }
+                        ? `Dieta calculada con Programación Lineal (GLPK)`
+                        : 'Resolverá cantidades óptimas minimizando costo'}
                     </p>
                   </div>
                 </div>
-                
                 <div className="flex items-center space-x-4">
                   {isCalculating && (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
                   )}
-                  
                   {validation && (
                     <div className="flex items-center space-x-2">
                       {validation.isValid ? (
@@ -356,7 +486,6 @@ const FAODietCalculator = () => {
                       </span>
                     </div>
                   )}
-                  
                   {canProceedToResults && (
                     <button
                       onClick={() => setCurrentStep(4)}
@@ -370,24 +499,9 @@ const FAODietCalculator = () => {
                 </div>
               </div>
 
-              {/* Method Description */}
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <div className="text-sm text-gray-700">
-                  {optimizationMethod === 'linear' ? (
-                    <div>
-                      <strong>📊 {language === 'en' ? 'Linear Programming:' : language === 'de' ? 'Lineare Programmierung:' : 'Programación Lineal:'}</strong> {
-                        language === 'en' ? 'Optimizes multiple ingredients simultaneously, considering category constraints and minimizing costs. Ideal for complex diets with many ingredients.' :
-                        language === 'de' ? 'Optimiert mehrere Futtermittel gleichzeitig unter Berücksichtigung von Kategoriebeschränkungen und Kostenminimierung. Ideal für komplexe Rationen mit vielen Futtermitteln.' :
-                        'Optimiza múltiples ingredientes simultáneamente, considerando restricciones por categorías y minimizando costos. Ideal para dietas complejas con muchos ingredientes.'
-                      }
-                    </div>
-                  ) : (
-                    <div>
-                      <strong>⚖️ Cuadrado de Pearson:</strong> Método clásico que balancea principalmente 2 ingredientes 
-                      (forraje + concentrado) según un nutriente objetivo (proteína). Simple, preciso y tradicional 
-                      en nutrición animal.
-                    </div>
-                  )}
+                  <strong>📊 LP (GLPK):</strong> {language === 'en' ? 'Minimizes total feed cost meeting nutrient constraints.' : language === 'de' ? 'Minimiert Gesamtkosten unter Nährstoffrestriktionen.' : 'Minimiza el costo total cumpliendo restricciones nutricionales.'}
                 </div>
               </div>
 

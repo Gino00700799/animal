@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { loadDietData } from '../utils/dataSources';
+import { faoIngredients, faoIngredientCategories } from '../data/faoIngredients';
 
 const DataContext = createContext({
   categories: [],
@@ -23,12 +24,26 @@ export const DataProvider = ({ children }) => {
         setLoading(true);
         const data = await loadDietData();
         if (!isMounted) return;
+        let ing = data.ingredients || [];
+        let catMap = data.ingredientCategories || {};
+        // Fallback if CSV empty
+        if (ing.length === 0) {
+            console.warn('[DataContext] CSV ingredients vacío, usando fallback estático');
+            ing = faoIngredients;
+        }
+        // Merge categories: static ensures feedlot categories present
+        catMap = { ...faoIngredientCategories, ...catMap };
         setCategories(data.categories || []);
-        setIngredientCategories(data.ingredientCategories || {});
-        setIngredients(data.ingredients || []);
+        setIngredientCategories(catMap);
+        setIngredients(ing);
         setError(null);
       } catch (e) {
-        if (isMounted) setError(e);
+        if (isMounted) {
+          console.error('[DataContext] Error cargando CSV, usando fallback estático', e);
+          setIngredientCategories(faoIngredientCategories);
+          setIngredients(faoIngredients);
+          setError(e);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
