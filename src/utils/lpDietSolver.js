@@ -1,48 +1,107 @@
 // Solver LP para formulación de dietas usando glpk.js (WASM browser-safe)
 import { NUTRIENT_LIMITS } from './nutritionConstraints';
 import { intensiveCategoryProfiles } from '../data/intensiveCategoryRequirements';
-import GLPKFactory from 'glpk.js';
+// dynamic import inside getGlpkInstance to avoid triggering WASM load at module eval time
+// import GLPKFactory from 'glpk.js';
 
 // Helper to resolve WASM path in CRA (expects glpk.wasm placed in public root or at /glpk/glpk.wasm)
-function resolveGlpkWasmPath() {
-  if (typeof process !== 'undefined' && process.env && process.env.PUBLIC_URL) {
-    return process.env.PUBLIC_URL + '/glpk.wasm';
-  }
-  return '/glpk.wasm';
+function resolveGlpkWasmPathCandidates() {
+  const base = (typeof process !== 'undefined' && process.env && process.env.PUBLIC_URL) ? process.env.PUBLIC_URL : '';
+  return [
+    base + '/glpk.wasm',
+    base + '/glpk/glpk.wasm'
+  ];
 }
 
 let glpkInstancePromise = null;
 let glpkAvailabilityChecked = false;
 let glpkWasmPresent = null; // tri-state: null unknown, boolean once checked
 
-async function checkGlpkWasmExists(wasmPath) {
-  if (glpkAvailabilityChecked) return glpkWasmPresent;
-  glpkAvailabilityChecked = true;
+function isGlpkDisabled() {
   try {
-    const res = await fetch(wasmPath, { method: 'HEAD' });
-    glpkWasmPresent = res.ok;
-    if (!res.ok) console.warn('[GLPK] WASM not found at', wasmPath, 'status', res.status);
-  } catch (e) {
-    console.warn('[GLPK] WASM HEAD check failed', e);
-    glpkWasmPresent = false;
+    // explicit env flag
+    if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_DISABLE_GLPK === '1') return true;
+    // runtime window flag or localStorage
+    if (typeof window !== 'undefined') {
+      if (window.__DISABLE_GLPK__ === true) return true;
+      const ls = window.localStorage && window.localStorage.getItem('disable_glpk');
+      if (ls === '1') return true;
+      if (ls === '0') return false; // explicit enable override
+    }
+    // default: disable in development to avoid overlay crashes, enable in production
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') return true;
+  } catch (_) {}
+  return false;
+}
+
+async function checkGlpkWasmExists(paths) {
+  if (glpkAvailabilityChecked && glpkWasmPresent != null) return glpkWasmPresent;
+  glpkAvailabilityChecked = true;
+  for (const p of paths) {
+    try {
+      const res = await fetch(p, { method: 'HEAD' });
+      if (res.ok) { glpkWasmPresent = p; return p; }
+      console.warn('[GLPK] WASM not found at', p, 'status', res.status);
+    } catch (e) {
+      console.warn('[GLPK] WASM HEAD check failed at', p, e);
+    }
   }
-  return glpkWasmPresent;
+  glpkWasmPresent = false;
+  return null;
+}
+
+async function loadWasmBinary(paths) {
+  for (const p of paths) {
+    try {
+      const res = await fetch(p, { cache: 'no-store' });
+      if (!res.ok) {
+        console.warn('[GLPK] GET not ok for', p, res.status);
+        continue;
+      }
+      const ct = res.headers.get('content-type') || '';
+      if (ct && !ct.includes('application/wasm')) {
+        // CRA dev server might still serve with octet-stream; be lenient but warn
+        if (!ct.includes('octet-stream')) {
+          console.warn('[GLPK] Unexpected content-type for', p, ct);
+        }
+      }
+      const buf = await res.arrayBuffer();
+      if (buf && buf.byteLength > 16) {
+        return { path: p, binary: new Uint8Array(buf) };
+      }
+      console.warn('[GLPK] Empty/too small WASM at', p);
+    } catch (e) {
+      console.warn('[GLPK] GET failed for', p, e);
+    }
+  }
+  return null;
 }
 
 async function getGlpkInstance() {
+  if (isGlpkDisabled()) {
+    console.warn('[GLPK] Disabled by config/environment. Skipping load.');
+    return null;
+  }
   if (!glpkInstancePromise) {
-    const wasmPath = resolveGlpkWasmPath();
-    // Pre-flight check to avoid uncaught ErrorEvent from failed internal WASM fetch
-    const exists = await checkGlpkWasmExists(wasmPath);
-    if (!exists) {
-      console.warn('[GLPK] Skipping initialization – glpk.wasm missing. Using heuristic fallback.');
+    const paths = resolveGlpkWasmPathCandidates();
+    // Fetch the WASM ourselves to avoid internal network load that can raise ErrorEvent
+    const wasm = await loadWasmBinary(paths);
+    if (!wasm) {
+      console.warn('[GLPK] Skipping initialization – glpk.wasm not retrievable. Using heuristic fallback.');
       return null; // Force caller to fallback
     }
-    console.log('[GLPK] Initializing with wasm path', wasmPath);
-    glpkInstancePromise = GLPKFactory({ locateFile: (file) => {
-      if (file === 'glpk.wasm') return wasmPath; // custom path
-      return file;
-    }}).catch(err => {
+    console.log('[GLPK] Initializing with wasm path', wasm.path);
+    glpkInstancePromise = (async () => {
+      const mod = await import('glpk.js');
+      const GLPKFactory = mod && mod.default ? mod.default : mod;
+      return GLPKFactory({
+        locateFile: (file) => {
+          if (file === 'glpk.wasm') return wasm.path; // custom path (not used when wasmBinary provided)
+          return file;
+        },
+        wasmBinary: wasm.binary
+      });
+    })().catch(err => {
       console.error('[GLPK] Initialization failed', err);
       glpkInstancePromise = null;
       throw err;
@@ -81,7 +140,7 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     cols.push({
       name: ing.id,
       kind: 'glp_cv', // continuous variable
-      bounds: { type: 'glp_lo', lb: 0, ub: 0 } // set later if needed (default >=0)
+      bounds: { type: 'GLP_LO', lb: 0, ub: 0 } // set later if needed (default >=0)
     });
   });
 
@@ -94,54 +153,54 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
 
   // Core constraints (>= / <= / == handled via types)
   // Energy >= totalME
-  addRow('energy_min', 'glp_lo', +totalME.toFixed(4), 0, {});
+  addRow('energy_min', 'GLP_LO', +totalME.toFixed(4), 0, {});
   // Protein >= crudeProteinRequired
-  addRow('protein_min', 'glp_lo', +crudeProteinRequired.toFixed(4), 0, {});
+  addRow('protein_min', 'GLP_LO', +crudeProteinRequired.toFixed(4), 0, {});
   // Calcium >= caReqKg
-  addRow('calcium_min', 'glp_lo', +caReqKg.toFixed(5), 0, {});
+  addRow('calcium_min', 'GLP_LO', +caReqKg.toFixed(5), 0, {});
   // Phosphorus >= pReqKg
-  addRow('phosphorus_min', 'glp_lo', +pReqKg.toFixed(5), 0, {});
+  addRow('phosphorus_min', 'GLP_LO', +pReqKg.toFixed(5), 0, {});
   // DM range 95% - 105%
   const dmMin = +(dryMatterIntake * 0.95).toFixed(4);
   const dmMax = +(dryMatterIntake * 1.05).toFixed(4);
-  addRow('dm_minmax', 'glp_db', dmMin, dmMax, {});
+  addRow('dm_minmax', 'GLP_DB', dmMin, dmMax, {});
 
   // Profile density constraints: transform to linear form
   // energyDensityMin: energy - minDensity * DM >= 0
   if (profile?.meDensity) {
-    addRow('energy_density_min', 'glp_lo', 0, 0, {});
-    addRow('energy_density_max', 'glp_up', 0, 0, {}); // energy - maxDensity*DM <= 0
+    addRow('energy_density_min', 'GLP_LO', 0, 0, {});
+    addRow('energy_density_max', 'GLP_UP', 0, 0, {}); // energy - maxDensity*DM <= 0
   }
   if (profile?.crudeProteinPct) {
-    addRow('cp_density_min', 'glp_lo', 0, 0, {});
-    addRow('cp_density_max', 'glp_up', 0, 0, {});
+    addRow('cp_density_min', 'GLP_LO', 0, 0, {});
+    addRow('cp_density_max', 'GLP_UP', 0, 0, {});
   }
   if (profile?.ndfPct) {
-    addRow('ndf_density_min', 'glp_lo', 0, 0, {});
-    addRow('ndf_density_max', 'glp_up', 0, 0, {});
+    addRow('ndf_density_min', 'GLP_LO', 0, 0, {});
+    addRow('ndf_density_max', 'GLP_UP', 0, 0, {});
   }
   if (profile?.starchPct) {
-    addRow('starch_density_max', 'glp_up', 0, 0, {});
+    addRow('starch_density_max', 'GLP_UP', 0, 0, {});
   }
   if (profile?.fatPct) {
-    addRow('fat_density_max', 'glp_up', 0, 0, {});
+    addRow('fat_density_max', 'GLP_UP', 0, 0, {});
   }
 
   // General NDF if no profile (ya existe). Añadir límite global de grasa si definido
   if (!profile && NUTRIENT_LIMITS?.ndf_pct_dm) {
     const ndfMinKg = dryMatterIntake * NUTRIENT_LIMITS.ndf_pct_dm.min;
     const ndfMaxKg = dryMatterIntake * NUTRIENT_LIMITS.ndf_pct_dm.max;
-    addRow('ndf_range', 'glp_db', +ndfMinKg.toFixed(4), +ndfMaxKg.toFixed(4), {});
+    addRow('ndf_range', 'GLP_DB', +ndfMinKg.toFixed(4), +ndfMaxKg.toFixed(4), {});
   }
   if (NUTRIENT_LIMITS?.fat_pct_dm?.max) {
     const fatMaxKg = dryMatterIntake * NUTRIENT_LIMITS.fat_pct_dm.max;
-    addRow('fat_max', 'glp_up', 0, +fatMaxKg.toFixed(4), {});
+    addRow('fat_max', 'GLP_UP', 0, +fatMaxKg.toFixed(4), {});
   }
 
   // Ca:P ratio -> calcium - R * phosphorus >= 0 and <= 0 for min/max
   if (NUTRIENT_LIMITS?.ca_p_ratio) {
-    addRow('ca_p_min', 'glp_lo', 0, 0, {});
-    addRow('ca_p_max', 'glp_up', 0, 0, {});
+    addRow('ca_p_min', 'GLP_LO', 0, 0, {});
+    addRow('ca_p_max', 'GLP_UP', 0, 0, {});
   }
 
   // Category caps
@@ -165,7 +224,7 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
   // Forage min (sum DM of forage cats >= 30% DM)
   let needForageMin = ingredients.some(i => ['forrajes_secos','pastos_verdes','ensilados'].includes(i.category));
   if (needForageMin) {
-    addRow('forage_min', 'glp_lo', +(dryMatterIntake * 0.30).toFixed(4), 0, {});
+    addRow('forage_min', 'GLP_LO', +(dryMatterIntake * 0.30).toFixed(4), 0, {});
   }
 
   // Populate coefficients per ingredient
@@ -235,7 +294,7 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
       if (maxCat) {
         const rowName = 'cat_' + ing.category;
         if (!categoryRows[ing.category]) {
-          addRow(rowName, 'glp_up', 0, +maxCat.toFixed(4), {});
+          addRow(rowName, 'GLP_UP', 0, +maxCat.toFixed(4), {});
           categoryRows[ing.category] = rowName;
         }
         setCoeff(rowName, dmF);
@@ -252,11 +311,11 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     if (explicitIngLimit) {
       // si se pasa límite explícito (as-fed), se prioriza ese (convertir a DM si quisieras, aquí se deja as-fed clásico)
       const rowName = ing.id + '_max_explicit';
-      addRow(rowName, 'glp_up', 0, explicitIngLimit, { [col]: 1 });
+      addRow(rowName, 'GLP_UP', 0, explicitIngLimit, { [col]: 1 });
     }
     if (maxKgDM != null) {
       const rowName = ing.id + '_maxUsage';
-      addRow(rowName, 'glp_up', 0, +maxKgDM.toFixed(4), { [col]: dmF });
+      addRow(rowName, 'GLP_UP', 0, +maxKgDM.toFixed(4), { [col]: dmF });
     }
 
     // Forage min
@@ -265,22 +324,35 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
     }
   });
 
-  // Objective coefficients (cost)
-  const objective = { direction: 'min', name: 'cost', vars: {} };
-  ingredients.forEach(ing => {
-    objective.vars[ing.id] = ing.costPerKg || 0.3;
-  });
+  // Objective coefficients (cost) - glpk.js expects array of { name, coef }
+  const objective = {
+    direction: 'GLP_MIN',
+    name: 'cost',
+    vars: ingredients.map(ing => ({ name: ing.id, coef: ing.costPerKg || 0.3 }))
+  };
 
-  // Build GLPK problem object
-  const glpkProblem = {
+  // Build GLPK problem object using proper glpk constants and shape
+  function toBnds(glpk, b) {
+    const rv = { type: glpk[b.type] };
+    if (b.lb != null) rv.lb = b.lb;
+    if (b.ub != null) rv.ub = b.ub;
+    return rv;
+  }
+  // glpk.js expects vars as array of { name, coef }
+  const subjectTo = rows.map(r => {
+    const rowVars = [];
+    for (const [colIndex, val] of Object.entries(r.coeffs)) {
+      const idx = Number(colIndex) - 1;
+      if (ingredients[idx]) rowVars.push({ name: ingredients[idx].id, coef: val });
+    }
+    return { name: r.name, vars: rowVars, bnds: null, bounds: r.bounds };
+  });
+  // note: we cannot map bnds until we have glpk instance; we'll patch below
+  const problemSkeleton = {
     name: 'diet_lp',
-    objective,
-    subjectTo: rows.map(r => ({
-      name: r.name,
-      vars: Object.entries(r.coeffs).map(([colIndex, val]) => ({ name: ingredients[colIndex - 1].id, coef: val })),
-      bounds: r.bounds
-    })),
-    bounds: cols.map(c => ({ name: c.name, bounds: { type: 'glp_lo', lb: 0, ub: 0 } })),
+    objective, // patch direction later
+    subjectTo,
+    bounds: ingredients.map(ing => ({ name: ing.id, bnds: null })),
     generals: [],
     binaries: []
   };
@@ -291,7 +363,16 @@ export async function solveDietLP(requirements, ingredients, constraints = {}) {
       return { isFeasible:false, message:'GLPK no disponible (WASM no cargado)', profileApplied: !!profile };
     }
     console.log('[LP] GLPK instance ready');
-    const res = glpk.solve(glpkProblem, { msgLevel: 'GLP_MSG_OFF' });
+    // Patch problem with GLPK enums
+    const glpProblem = {
+      name: problemSkeleton.name,
+      objective: { direction: glpk[objective.direction], name: objective.name, vars: objective.vars },
+      subjectTo: problemSkeleton.subjectTo.map(r => ({ name: r.name, vars: r.vars, bnds: toBnds(glpk, r.bounds) })),
+      bounds: problemSkeleton.bounds.map(b => ({ name: b.name, bnds: { type: glpk.GLP_LO, lb: 0, ub: 0 } })),
+      generals: problemSkeleton.generals,
+      binaries: problemSkeleton.binaries
+    };
+    const res = glpk.solve(glpProblem, { msgLevel: glpk.GLP_MSG_ERR });
     console.log('[LP] Solve status', res.result?.status);
     if (!res.result || res.result.status !== 'glp_opt') {
       return { isFeasible: false, message: res.result ? 'Modelo infeasible' : 'Error interno solver', profileApplied: !!profile };

@@ -87,6 +87,10 @@ export const optimizeDiet = async (requirements, ingredients, constraints = {}) 
   try {
     console.log('[OPT] Starting optimization', { req: requirements, ingredientCount: ingredients?.length });
     const lpSolution = await solveDietLP(requirements, ingredients, constraints);
+    if (lpSolution && lpSolution.error) {
+      console.warn('[OPT] LP solver reported error, forcing fallback');
+      throw new Error(lpSolution.message || 'LP error');
+    }
     console.log('[OPT] LP solution raw', lpSolution);
     if (lpSolution && lpSolution.isFeasible) {
       return { ...lpSolution, method: 'Programación Lineal (GLPK)' };
