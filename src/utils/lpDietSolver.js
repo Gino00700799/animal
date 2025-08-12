@@ -1,107 +1,64 @@
 // Solver LP para formulación de dietas usando glpk.js (WASM browser-safe)
 import { NUTRIENT_LIMITS } from './nutritionConstraints';
 import { intensiveCategoryProfiles } from '../data/intensiveCategoryRequirements';
-// dynamic import inside getGlpkInstance to avoid triggering WASM load at module eval time
-// import GLPKFactory from 'glpk.js';
+import GLPKFactory from 'glpk.js';
 
-// Helper to resolve WASM path in CRA (expects glpk.wasm placed in public root or at /glpk/glpk.wasm)
-function resolveGlpkWasmPathCandidates() {
+// Helper to resolve possible WASM paths
+function getGlpkWasmCandidates() {
   const base = (typeof process !== 'undefined' && process.env && process.env.PUBLIC_URL) ? process.env.PUBLIC_URL : '';
   return [
-    base + '/glpk.wasm',
-    base + '/glpk/glpk.wasm'
+    `${base}/glpk.wasm`,            // root
+    `${base}/glpk/glpk.wasm`        // under /glpk/
   ];
 }
 
 let glpkInstancePromise = null;
 let glpkAvailabilityChecked = false;
-let glpkWasmPresent = null; // tri-state: null unknown, boolean once checked
+let glpkWasmPresent = null; // tri-state
+let chosenWasmPath = null;
 
-function isGlpkDisabled() {
+async function headWithTimeout(url, ms = 2000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
   try {
-    // explicit env flag
-    if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_DISABLE_GLPK === '1') return true;
-    // runtime window flag or localStorage
-    if (typeof window !== 'undefined') {
-      if (window.__DISABLE_GLPK__ === true) return true;
-      const ls = window.localStorage && window.localStorage.getItem('disable_glpk');
-      if (ls === '1') return true;
-      if (ls === '0') return false; // explicit enable override
-    }
-    // default: disable in development to avoid overlay crashes, enable in production
-    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') return true;
-  } catch (_) {}
-  return false;
+    const res = await fetch(url, { method: 'HEAD', signal: controller.signal, cache: 'no-cache' });
+    return res.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(id);
+  }
 }
 
-async function checkGlpkWasmExists(paths) {
-  if (glpkAvailabilityChecked && glpkWasmPresent != null) return glpkWasmPresent;
+async function detectGlpkWasmPath() {
+  if (glpkAvailabilityChecked) return glpkWasmPresent ? chosenWasmPath : null;
   glpkAvailabilityChecked = true;
-  for (const p of paths) {
-    try {
-      const res = await fetch(p, { method: 'HEAD' });
-      if (res.ok) { glpkWasmPresent = p; return p; }
-      console.warn('[GLPK] WASM not found at', p, 'status', res.status);
-    } catch (e) {
-      console.warn('[GLPK] WASM HEAD check failed at', p, e);
+  const candidates = getGlpkWasmCandidates();
+  for (const url of candidates) {
+    const ok = await headWithTimeout(url, 1500);
+    if (ok) {
+      chosenWasmPath = url;
+      glpkWasmPresent = true;
+      return chosenWasmPath;
     }
   }
+  console.warn('[GLPK] WASM not found at candidates', candidates);
   glpkWasmPresent = false;
   return null;
 }
 
-async function loadWasmBinary(paths) {
-  for (const p of paths) {
-    try {
-      const res = await fetch(p, { cache: 'no-store' });
-      if (!res.ok) {
-        console.warn('[GLPK] GET not ok for', p, res.status);
-        continue;
-      }
-      const ct = res.headers.get('content-type') || '';
-      if (ct && !ct.includes('application/wasm')) {
-        // CRA dev server might still serve with octet-stream; be lenient but warn
-        if (!ct.includes('octet-stream')) {
-          console.warn('[GLPK] Unexpected content-type for', p, ct);
-        }
-      }
-      const buf = await res.arrayBuffer();
-      if (buf && buf.byteLength > 16) {
-        return { path: p, binary: new Uint8Array(buf) };
-      }
-      console.warn('[GLPK] Empty/too small WASM at', p);
-    } catch (e) {
-      console.warn('[GLPK] GET failed for', p, e);
-    }
-  }
-  return null;
-}
-
 async function getGlpkInstance() {
-  if (isGlpkDisabled()) {
-    console.warn('[GLPK] Disabled by config/environment. Skipping load.');
-    return null;
-  }
   if (!glpkInstancePromise) {
-    const paths = resolveGlpkWasmPathCandidates();
-    // Fetch the WASM ourselves to avoid internal network load that can raise ErrorEvent
-    const wasm = await loadWasmBinary(paths);
-    if (!wasm) {
-      console.warn('[GLPK] Skipping initialization – glpk.wasm not retrievable. Using heuristic fallback.');
+    const wasmPath = await detectGlpkWasmPath();
+    if (!wasmPath) {
+      console.warn('[GLPK] Skipping initialization – glpk.wasm missing. Using heuristic fallback.');
       return null; // Force caller to fallback
     }
-    console.log('[GLPK] Initializing with wasm path', wasm.path);
-    glpkInstancePromise = (async () => {
-      const mod = await import('glpk.js');
-      const GLPKFactory = mod && mod.default ? mod.default : mod;
-      return GLPKFactory({
-        locateFile: (file) => {
-          if (file === 'glpk.wasm') return wasm.path; // custom path (not used when wasmBinary provided)
-          return file;
-        },
-        wasmBinary: wasm.binary
-      });
-    })().catch(err => {
+    console.log('[GLPK] Initializing with wasm path', wasmPath);
+    glpkInstancePromise = GLPKFactory({ locateFile: (file) => {
+      if (file === 'glpk.wasm') return wasmPath; // custom path
+      return file;
+    }}).catch(err => {
       console.error('[GLPK] Initialization failed', err);
       glpkInstancePromise = null;
       throw err;

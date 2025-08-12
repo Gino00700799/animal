@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, TrendingUp, DollarSign, Calculator, BarChart3, Download } from 'lucide-react';
 import { optimizeDiet } from '../utils/dietOptimization';
 import { calculateCompleteNutrientRequirements } from '../utils/faoCalculations';
-import { getAllIngredients } from '../data/faoIngredients';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredients }) => {
@@ -50,7 +49,8 @@ const MultiPeriodCalculator = ({ animalData, selectedCategory, selectedIngredien
           dryMatterIntake: requirements.nutrients.dryMatterIntake
         };
 
-        const optimizedDiet = optimizeDiet(dietRequirements, selectedIngredients);
+        // Await the async optimizer
+        const optimizedDiet = await optimizeDiet(dietRequirements, selectedIngredients);
 
         // Calcular costos mensuales
         const dailyCost = optimizedDiet.totalCost;

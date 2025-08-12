@@ -1,11 +1,17 @@
 import { parseCsv, toNumber, toStringOr } from './csvParser';
 
-// Helper to fetch CSV/JSON from public/csv
-async function fetchText(relativePath) {
+// Helper to fetch CSV/JSON from public/csv with timeout
+async function fetchText(relativePath, timeoutMs = 5000) {
   const url = `${process.env.PUBLIC_URL || ''}${relativePath.startsWith('/') ? relativePath : '/' + relativePath}`;
-  const res = await fetch(url, { cache: 'no-cache' });
-  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-  return res.text();
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { cache: 'no-cache', signal: controller.signal });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    return res.text();
+  } finally {
+    clearTimeout(id);
+  }
 }
 
 async function fetchCsv(relativePath) {
